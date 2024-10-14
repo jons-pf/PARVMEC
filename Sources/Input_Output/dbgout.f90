@@ -156,26 +156,26 @@ function open_dbg_context(context_name, repetition, id)
     open_dbg_context         = dump_freeb_data
 
   ! NESTOR
-  else if (trim(context_name) .eq. "vacuum") then
-    open_dbg_context         = dump_vacuum
-  else if (trim(context_name) .eq. "precal") then
-    open_dbg_context         = dump_precal
-  else if (trim(context_name) .eq. "surface") then
-    open_dbg_context         = dump_surface
-  else if (trim(context_name) .eq. "bextern") then
-    open_dbg_context         = dump_bextern
-  else if (trim(context_name) .eq. "analyt") then
-    open_dbg_context         = dump_analyt
-  else if (trim(context_name) .eq. "greenf") then
-    open_dbg_context         = dump_greenf
-  else if (trim(context_name) .eq. "fourp") then
-    open_dbg_context         = dump_fourp
-  else if (trim(context_name) .eq. "fouri") then
-    open_dbg_context         = dump_fouri
-  else if (trim(context_name) .eq. "solver") then
-    open_dbg_context         = dump_solver
-  else if (trim(context_name) .eq. "bsqvac") then
-    open_dbg_context         = dump_bsqvac
+  else if (trim(context_name) .eq. "vac1n_vacuum") then
+    open_dbg_context         = dump_vac1n_vacuum
+  else if (trim(context_name) .eq. "vac1n_precal") then
+    open_dbg_context         = dump_vac1n_precal
+  else if (trim(context_name) .eq. "vac1n_surface") then
+    open_dbg_context         = dump_vac1n_surface
+  else if (trim(context_name) .eq. "vac1n_bextern") then
+    open_dbg_context         = dump_vac1n_bextern
+  else if (trim(context_name) .eq. "vac1n_analyt") then
+    open_dbg_context         = dump_vac1n_analyt
+  else if (trim(context_name) .eq. "vac1n_greenf") then
+    open_dbg_context         = dump_vac1n_greenf
+  else if (trim(context_name) .eq. "vac1n_fourp") then
+    open_dbg_context         = dump_vac1n_fourp
+  else if (trim(context_name) .eq. "vac1n_fouri") then
+    open_dbg_context         = dump_vac1n_fouri
+  else if (trim(context_name) .eq. "vac1n_solver") then
+    open_dbg_context         = dump_vac1n_solver
+  else if (trim(context_name) .eq. "vac1n_bsqvac") then
+    open_dbg_context         = dump_vac1n_bsqvac
 
   ! default
   else
