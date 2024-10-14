@@ -155,55 +155,27 @@ function open_dbg_context(context_name, repetition, id)
   else if (trim(context_name) .eq. "freeb_data") then
     open_dbg_context         = dump_freeb_data
 
-
-  ! NESTOR vac1
-  else if (trim(context_name) .eq. "vac1n_vacuum") then
-    open_dbg_context         = dump_vac1n_vacuum
-  else if (trim(context_name) .eq. "vac1n_precal") then
-    open_dbg_context         = dump_vac1n_precal
-  else if (trim(context_name) .eq. "vac1n_surface") then
-    open_dbg_context         = dump_vac1n_surface
-  else if (trim(context_name) .eq. "vac1n_bextern") then
-    open_dbg_context         = dump_vac1n_bextern
-  else if (trim(context_name) .eq. "vac1n_analyt") then
-    open_dbg_context         = dump_vac1n_analyt
-  else if (trim(context_name) .eq. "vac1n_greenf") then
-    open_dbg_context         = dump_vac1n_greenf
-  else if (trim(context_name) .eq. "vac1n_fourp") then
-    open_dbg_context         = dump_vac1n_fourp
-  else if (trim(context_name) .eq. "vac1n_fouri") then
-    open_dbg_context         = dump_vac1n_fouri
-  else if (trim(context_name) .eq. "vac1n_solver") then
-    open_dbg_context         = dump_vac1n_solver
-  else if (trim(context_name) .eq. "vac1n_bsqvac") then
-    open_dbg_context         = dump_vac1n_bsqvac
-
-  ! NESTOR vac2
-  else if (trim(context_name) .eq. "vac2_vacuum") then
-    open_dbg_context         = dump_vac2_vacuum
-  else if (trim(context_name) .eq. "vac2_precal") then
-    open_dbg_context         = dump_vac2_precal
-  else if (trim(context_name) .eq. "vac2_surface") then
-    open_dbg_context         = dump_vac2_surface
-  else if (trim(context_name) .eq. "vac2_bexmat") then
-    open_dbg_context         = dump_vac2_bexmat
-  else if (trim(context_name) .eq. "vac2_matrix") then
-    open_dbg_context         = dump_vac2_matrix
-  else if (trim(context_name) .eq. "vac2_foumat_unreg") then
-    open_dbg_context         = dump_vac2_foumat_unreg
-  else if (trim(context_name) .eq. "vac2_analin") then
-    open_dbg_context         = dump_vac2_analin
-  else if (trim(context_name) .eq. "vac2_analyt") then
-    open_dbg_context         = dump_vac2_analyt
-  else if (trim(context_name) .eq. "vac2_foumat") then
-    open_dbg_context         = dump_vac2_foumat
-  else if (trim(context_name) .eq. "vac2_linsys") then
-    open_dbg_context         = dump_vac2_linsys
-  else if (trim(context_name) .eq. "vac2_linslv") then
-    open_dbg_context         = dump_vac2_linslv
-  else if (trim(context_name) .eq. "vac2_bsqvac") then
-    open_dbg_context         = dump_vac2_bsqvac
-
+  ! NESTOR
+  else if (trim(context_name) .eq. "vacuum") then
+    open_dbg_context         = dump_vacuum
+  else if (trim(context_name) .eq. "precal") then
+    open_dbg_context         = dump_precal
+  else if (trim(context_name) .eq. "surface") then
+    open_dbg_context         = dump_surface
+  else if (trim(context_name) .eq. "bextern") then
+    open_dbg_context         = dump_bextern
+  else if (trim(context_name) .eq. "analyt") then
+    open_dbg_context         = dump_analyt
+  else if (trim(context_name) .eq. "greenf") then
+    open_dbg_context         = dump_greenf
+  else if (trim(context_name) .eq. "fourp") then
+    open_dbg_context         = dump_fourp
+  else if (trim(context_name) .eq. "fouri") then
+    open_dbg_context         = dump_fouri
+  else if (trim(context_name) .eq. "solver") then
+    open_dbg_context         = dump_solver
+  else if (trim(context_name) .eq. "bsqvac") then
+    open_dbg_context         = dump_bsqvac
 
   ! default
   else
