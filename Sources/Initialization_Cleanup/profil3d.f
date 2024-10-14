@@ -178,9 +178,9 @@
         call add_real_3d("scalxc", ns, ntor1, mpol, pscalxc(:irzloff),         &
      &                   order=(/ 2, 3, 1 /) )
         call add_real_4d("rmn", ntmax, ns, ntor1, mpol, rmn,                   &
-     &                   order=(/ 2, 3, 4, 1 /) )
+     &                   order=(/ 3, 4, 2, 1 /) )
         call add_real_4d("zmn", ntmax, ns, ntor1, mpol, zmn,                   &
-     &                   order=(/ 2, 3, 4, 1 /) )
+     &                   order=(/ 3, 4, 2, 1 /) )
 
         call close_dbg_out()
       end if
