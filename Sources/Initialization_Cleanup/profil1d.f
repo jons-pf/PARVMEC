@@ -236,7 +236,7 @@ C-----------------------------------------------
         call add_real("Itor", Itor)
 
         call add_real_1d("shalf", ns+1, shalf(:ns+1))
-        call add_real_1d("phips", ns,   phips(2:ns+1))
+        call add_real_1d("phips", ns,   phips(1:ns))
         call add_real_1d("chips", ns-1, chips(2:ns))
         call add_real_1d("iotas", ns-1, iotas(2:ns))
         call add_real_1d("icurv", ns-1, icurv(2:ns))
