@@ -5,6 +5,7 @@
 #ifdef _HBANGLE
       USE angle_constraints, ONLY: init_multipliers
 #endif
+      USE dbgout
       IMPLICIT NONE
 C-----------------------------------------------
 C   L o c a l   P a r a m e t e r s
@@ -16,6 +17,7 @@ C-----------------------------------------------
       INTEGER  :: i, m, j, n, mn, mn1, nmin0, istat1, istat2
       INTEGER  :: mnyq0, nnyq0
       REAL(dp) :: argi, arg, argj, dnorm, dnorm3, tfixon, tfixoff
+      LOGICAL  :: dbg_fixaray
 C-----------------------------------------------
 !
 !     INDEX OF LOCAL VARIABLES
@@ -187,6 +189,35 @@ C-----------------------------------------------
          STOP 'mn1 != mnmax'
       END IF
 
+      dbg_fixaray = open_dbg_context("fixaray")
+      if (dbg_fixaray) then
+
+        call add_real_2d("arg_mu",    ntheta3, mnyq+1, arg_mu(1:ntheta3, 0:mnyq))
+        call add_real_2d("arg_nv",    nzeta,   nnyq+1, arg_nv(1:nzeta,   0:nnyq))
+
+        call add_real_2d("cosmu",    ntheta2, mnyq+1, cosmu(1:ntheta2,:))
+        call add_real_2d("sinmu",    ntheta2, mnyq+1, sinmu(1:ntheta2,:))
+        call add_real_2d("cosmum",   ntheta2, mnyq+1, cosmum(1:ntheta2,:))
+        call add_real_2d("sinmum",   ntheta2, mnyq+1, sinmum(1:ntheta2,:))
+        call add_real_2d("cosmui",   ntheta2, mnyq+1, cosmui(1:ntheta2,:))
+        call add_real_2d("sinmui",   ntheta2, mnyq+1, sinmui(1:ntheta2,:))
+        call add_real_2d("cosmui3",  ntheta2, mnyq+1, cosmui3(1:ntheta2,:))
+        call add_real_2d("cosmumi",  ntheta2, mnyq+1, cosmumi(1:ntheta2,:))
+        call add_real_2d("sinmumi",  ntheta2, mnyq+1, sinmumi(1:ntheta2,:))
+        call add_real_2d("cosmumi3", ntheta2, mnyq+1, cosmumi3(1:ntheta2,:))
+
+        call add_real_2d("cosnv",  nzeta, nnyq+1, cosnv)
+        call add_real_2d("sinnv",  nzeta, nnyq+1, sinnv)
+        call add_real_2d("cosnvn", nzeta, nnyq+1, cosnvn)
+        call add_real_2d("sinnvn", nzeta, nnyq+1, sinnvn)
+
+        call add_real_1d("mscale", mnyq+1, mscale)
+        call add_real_1d("nscale", nnyq+1, nscale)
+
+        ! TODO: add r0scale output (currently in residue...)
+
+      end if
+
 !
 !     COMPUTE NYQUIST-SIZED ARRAYS FOR OUTPUT.
 !     RESTORE m,n Nyquist TO 1 X ... (USED IN WROUT, JXBFORCE)
@@ -223,6 +254,41 @@ C-----------------------------------------------
       faccon(0) = zero
       faccon(mpol1) = zero
       faccon(1:mpol1 - 1) = -0.25_dp*signgs/xmpq(2:mpol1,1)**2
+
+      if (dbg_fixaray) then
+
+        call add_int("ntheta3", ntheta3)
+        call add_int("mnyq", mnyq)
+        call add_int("nzeta", nzeta)
+        call add_int("nnyq", nnyq)
+        call add_int("nznt", nznt)
+        call add_int("mnmax", mnmax)
+        call add_int("mnsize", mnsize)
+        call add_int("mnmax_nyq", mnmax_nyq)
+
+        call add_real_1d("cos01", nznt, cos01)
+        call add_real_1d("sin01", nznt, sin01)
+
+        call add_real_1d("xm", mnmax, xm)
+        call add_real_1d("xn", mnmax, xn)
+
+        call add_real_1d("xm_nyq", mnmax_nyq, xm_nyq)
+        call add_real_1d("xn_nyq", mnmax_nyq, xn_nyq)
+
+        call add_int_1d("ixm", mnsize, ixm)
+
+        call close_dbg_out()
+      end if
+
+      if (open_dbg_context("spectral_constraint", num_eqsolve_retries)) then
+
+        ! xmpq is allocated statically, so need size here explicitly!
+        call add_real_2d("xmpq", mpol, 3, xmpq(0:mpol1,1:3))
+
+        call add_real_1d("faccon", mpol, faccon)
+
+        call close_dbg_out()
+      end if
 
 #ifdef _HBANGLE
       CALL init_multipliers
