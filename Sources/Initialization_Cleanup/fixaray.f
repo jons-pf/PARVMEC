@@ -192,19 +192,30 @@ C-----------------------------------------------
       dbg_fixaray = open_dbg_context("fixaray")
       if (dbg_fixaray) then
 
-        call add_real_2d("arg_mu",    ntheta3, mnyq+1, arg_mu(1:ntheta3, 0:mnyq))
-        call add_real_2d("arg_nv",    nzeta,   nnyq+1, arg_nv(1:nzeta,   0:nnyq))
-
-        call add_real_2d("cosmu",    ntheta2, mnyq+1, cosmu(1:ntheta2,:))
-        call add_real_2d("sinmu",    ntheta2, mnyq+1, sinmu(1:ntheta2,:))
-        call add_real_2d("cosmum",   ntheta2, mnyq+1, cosmum(1:ntheta2,:))
-        call add_real_2d("sinmum",   ntheta2, mnyq+1, sinmum(1:ntheta2,:))
-        call add_real_2d("cosmui",   ntheta2, mnyq+1, cosmui(1:ntheta2,:))
-        call add_real_2d("sinmui",   ntheta2, mnyq+1, sinmui(1:ntheta2,:))
-        call add_real_2d("cosmui3",  ntheta2, mnyq+1, cosmui3(1:ntheta2,:))
-        call add_real_2d("cosmumi",  ntheta2, mnyq+1, cosmumi(1:ntheta2,:))
-        call add_real_2d("sinmumi",  ntheta2, mnyq+1, sinmumi(1:ntheta2,:))
-        call add_real_2d("cosmumi3", ntheta2, mnyq+1, cosmumi3(1:ntheta2,:))
+        call add_real_2d("arg_mu",                                             &
+     &                   ntheta3, mnyq+1, arg_mu(1:ntheta3, 0:mnyq))
+        call add_real_2d("arg_nv",                                             &
+     &                   nzeta,   nnyq+1, arg_nv(1:nzeta,   0:nnyq))
+        call add_real_2d("cosmu",                                              &
+     &                   ntheta2, mnyq+1, cosmu(1:ntheta2,:))
+        call add_real_2d("sinmu",                                              &
+     &                   ntheta2, mnyq+1, sinmu(1:ntheta2,:))
+        call add_real_2d("cosmum",                                             &
+     &                   ntheta2, mnyq+1, cosmum(1:ntheta2,:))
+        call add_real_2d("sinmum",                                             &
+     &                   ntheta2, mnyq+1, sinmum(1:ntheta2,:))
+        call add_real_2d("cosmui",                                             &
+     &                   ntheta2, mnyq+1, cosmui(1:ntheta2,:))
+        call add_real_2d("sinmui",                                             &
+     &                   ntheta2, mnyq+1, sinmui(1:ntheta2,:))
+        call add_real_2d("cosmui3",                                            &
+     &                   ntheta2, mnyq+1, cosmui3(1:ntheta2,:))
+        call add_real_2d("cosmumi",                                            &
+     &                   ntheta2, mnyq+1, cosmumi(1:ntheta2,:))
+        call add_real_2d("sinmumi",                                            &
+     &                   ntheta2, mnyq+1, sinmumi(1:ntheta2,:))
+        call add_real_2d("cosmumi3",                                           &
+     &                   ntheta2, mnyq+1, cosmumi3(1:ntheta2,:))
 
         call add_real_2d("cosnv",  nzeta, nnyq+1, cosnv)
         call add_real_2d("sinnv",  nzeta, nnyq+1, sinnv)
@@ -280,7 +291,8 @@ C-----------------------------------------------
         call close_dbg_out()
       end if
 
-      if (open_dbg_context("spectral_constraint", num_eqsolve_retries)) then
+      if (open_dbg_context("spectral_constraint",                              &
+     &    num_eqsolve_retries)) then
 
         ! xmpq is allocated statically, so need size here explicitly!
         call add_real_2d("xmpq", mpol, 3, xmpq(0:mpol1,1:3))
