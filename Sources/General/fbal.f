@@ -8,7 +8,8 @@
       SUBROUTINE calc_fbal_par(bsubu, bsubv)
       USE vmec_main, ONLY: buco, bvco, equif, iequi,
      1                     jcurv, jcuru, chipf, vp, pres,
-     2                     phipf, vpphi, presgrad, ohs
+     2                     phipf, vpphi, presgrad, ohs,
+     3                     num_eqsolve_retries
       USE vmec_params, ONLY: signgs
       USE vmec_dim, ONLY: ns, nrzt, nznt, ns1
       USE realspace, ONLY: pwint, phip
