@@ -1,6 +1,7 @@
 target_sources(vmec
                PRIVATE
                $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/bss.f>
+               $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/dbgout.f90>
                $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/dump_output.f>
                $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/elongation.f>
                $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/eqfor.f>
