@@ -10,6 +10,7 @@ target_sources(vmec
                $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/fsym_invfft.f>
                $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/getbrho.f>
                $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/getcurmid.f>
+               $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/json.f90>
                $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/jxbforce.f>
                $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/mercier.f>
                $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/perf2likwid.f90>
