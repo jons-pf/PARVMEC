@@ -8,6 +8,7 @@
       USE angle_constraints, ONLY: store_init_array
 #endif
       USE parallel_include_module
+      USE dbgout
       IMPLICIT NONE
 !-----------------------------------------------
 !   D u m m y   A r g u m e n t s
@@ -170,6 +171,16 @@
             END DO
          END DO
       END DO
+
+      ! dump all relevant output to a text file
+      if (open_dbg_context("profil3d", num_eqsolve_retries)) then
+
+        call add_real_3d("scalxc", ns, ntor1, mpol, pscalxc(:irzloff))
+        call add_real_4d("rmn", ntmax, ns, ntor1, mpol, rmn, order=(/ 2, 3, 4, 1 /) )
+        call add_real_4d("zmn", ntmax, ns, ntor1, mpol, zmn, order=(/ 2, 3, 4, 1 /) )
+
+        call close_dbg_out()
+      end if
 
 #ifdef _HBANGLE
       IF (.NOT.linterp) THEN
@@ -334,5 +345,5 @@
 #ifdef _HBANGLE
       IF (.NOT.linterp) CALL store_init_array(xc)
 #endif
-      
+
       END SUBROUTINE profil3d

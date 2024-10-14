@@ -9,6 +9,7 @@
       USE realspace
       USE vmec_params, ONLY: ntmax
       USE parallel_include_module
+      USE dbgout
       IMPLICIT NONE
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
@@ -75,7 +76,7 @@ C-----------------------------------------------
          polflux_edge = polflux_edge/si
       END IF
       r00 = rmn_bdy(0,0,rcc)
-      
+
       phips(1) = 0
       chips(1) = 0
       icurv(1) = 0
@@ -129,7 +130,7 @@ C-----------------------------------------------
       IF (ABS(pedge) .gt. ABS(EPSILON(pedge)*curtor)) THEN
          Itor = signgs*currv/(twopi*pedge)
       END IF
-      
+
       nsmin = MAX(2, t1lglob)
       nsmax = t1rglob
       !icurv(nsmin:nsmax) = Itor*icurv(nsmin:nsmax)
@@ -221,9 +222,37 @@ C-----------------------------------------------
       sp(0) = 0
       sp(1) = sm(2)
 
-      IF (lreset) THEN      
+      IF (lreset) THEN
          xc(:,:,t1lglob:t1rglob,:) = 0
       END IF
+
+      if (open_dbg_context("profil1d", num_eqsolve_retries)) then
+
+        call add_real("torflux_edge", torflux_edge)
+        call add_real("polflux_edge", polflux_edge)
+        call add_real("r00", r00)
+        call add_real("lamscale", lamscale)
+        call add_real("currv", currv)
+        call add_real("Itor", Itor)
+
+        call add_real_1d("shalf", ns+1, shalf(:ns+1))
+        call add_real_1d("phips", ns,   phips(2:ns+1))
+        call add_real_1d("chips", ns-1, chips(2:ns))
+        call add_real_1d("iotas", ns-1, iotas(2:ns))
+        call add_real_1d("icurv", ns-1, icurv(2:ns))
+        call add_real_1d("mass",  ns-1, mass(2:ns))
+
+        call add_real_1d("sqrts", ns,   sqrts(:ns))
+        call add_real_1d("phipf", ns,   phipf)
+        call add_real_1d("chipf", ns,   chipf)
+        call add_real_1d("iotaf", ns,   iotaf)
+        call add_real_1d("bdamp", ns,   bdamp)
+
+        call add_real_1d("sm",    ns,   sm)
+        call add_real_1d("sp",    ns+1, sp)
+
+        call close_dbg_out()
+      end if
 
       END SUBROUTINE profil1d_par
 
