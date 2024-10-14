@@ -179,6 +179,11 @@
          vp(js) = signgs*SUM(gsqrt(:,js)*pwint(:,js))
       END DO
 
+      if (open_dbg_context("volume", num_eqsolve_retries)) then
+        call add_real_1d("vp", ns+1, vp)
+        call close_dbg_out()
+      end if
+
 !
 !     COMPUTE CONTRA-VARIANT COMPONENTS OF B (Bsupu,v) ON RADIAL HALF-MESH
 !     TO ACCOMODATE LRFP=T CASES, THE OVERALL PHIP FACTOR (PRIOR TO v8.46)
