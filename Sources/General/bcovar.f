@@ -334,6 +334,20 @@
       bsubv_e(:,ns) = bsubv_e(:,ns)
      &              + p5*(lvv(:,ns)*lu(:,ns,1) + bsubu_e(:,ns))
 
+      if (open_dbg_context("lambda_forces", num_eqsolve_retries)) then
+
+        call add_real_3d("lvv",     ns,    nzeta, ntheta3, lvv,                &
+     &                   order = (/ 2, 3, 1 /) )
+        call add_real_4d("lu",      ns, 2, nzeta, ntheta3, lu,                 &
+     &                   order = (/ 3, 4, 1, 2 /) )
+        call add_real_3d("bsubu_e", ns,    nzeta, ntheta3, bsubu_e,            &
+     &                   order = (/ 2, 3, 1 /) )
+        call add_real_3d("bsubv_e", ns,    nzeta, ntheta3, bsubv_e,            &
+     &                   order = (/ 2, 3, 1 /) )
+
+        call close_dbg_out()
+      end if
+
 !
 !     COMPUTE AVERAGE FORCE BALANCE AND TOROIDAL/POLOIDAL CURRENTS
 !
