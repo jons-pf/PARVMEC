@@ -290,6 +290,23 @@
          lvv(:,l) = phipog(:,l)*pgvv(:,l)
       END DO
 
+      if (open_dbg_context("bcov", num_eqsolve_retries)) then
+
+        call add_real_3d("bsubuh", ns, nzeta, ntheta3, bsubuh,                 &
+     &                   order = (/ 2, 3, 1 /) )
+        call add_real_3d("bsubvh", ns, nzeta, ntheta3, bsubvh,                 &
+     &                   order = (/ 2, 3, 1 /) )
+        call add_real_3d("bsq",    ns, nzeta, ntheta3, bsq,                    &
+     &                   order = (/ 2, 3, 1 /) )
+
+        call add_real_1d("pres", ns-1, pres(2:ns))
+
+        call add_real("wb", wb)
+        call add_real("wp", wp)
+
+        call close_dbg_out()
+      end if
+
 !SPH122407-MOVED HERE: COMPUTE LAMBDA FULL MESH FORCES
 !     NOTE: bsubu_e is used here ONLY as a temporary array
 
