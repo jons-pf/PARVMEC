@@ -601,6 +601,32 @@
          lu(:,l,0) = bsq(:,l)*r12(:,l)
       END DO
 
+      if (open_dbg_context("lulv_comb", num_eqsolve_retries)) then
+
+        call add_real_3d("bsubu_e", ns,    nzeta, ntheta3, bsubu_e             &
+     &                   order = (/ 2, 3, 1 /) )
+        call add_real_3d("bsubv_e", ns,    nzeta, ntheta3, bsubv_e             &
+     &                   order = (/ 2, 3, 1 /) )
+        call add_real_3d("bsubu_o", ns,    nzeta, ntheta3, bsubu_o             &
+     &                   order = (/ 2, 3, 1 /) )
+        call add_real_3d("bsubv_o", ns,    nzeta, ntheta3, bsubv_o             &
+     &                   order = (/ 2, 3, 1 /) )
+        call add_real_3d("lvv",     ns,    nzeta, ntheta3, lvv                 &
+     &                   order = (/ 2, 3, 1 /) )
+        call add_real_3d("guu",     ns,    nzeta, ntheta3, pguu                &
+     &                   order = (/ 2, 3, 1 /) )
+        call add_real_3d("guv",     ns,    nzeta, ntheta3, pguv                &
+     &                   order = (/ 2, 3, 1 /) )
+        call add_real_3d("gvv",     ns,    nzeta, ntheta3, pgvv                &
+     &                   order = (/ 2, 3, 1 /) )
+        call add_real_4d("lv",      ns, 2, nzeta, ntheta3, lv,                 &
+     &                   order=(/ 3, 4, 1, 2 /))
+        call add_real_4d("lu",      ns, 2, nzeta, ntheta3, lu,                 &
+     &                   order=(/ 3, 4, 1, 2 /))
+
+        call close_dbg_out()
+      end if
+
       END SUBROUTINE bcovar_par
 
       SUBROUTINE bcovar (lu, lv)
