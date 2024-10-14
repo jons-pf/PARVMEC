@@ -1,6 +1,6 @@
       SUBROUTINE funct3d_par (lscreen, ier_flag)
       USE vmec_main
-      USE vacmod, ONLY: bsqvac, bsqvac0, raxis_nestor, zaxis_nestor, 
+      USE vacmod, ONLY: bsqvac, bsqvac0, raxis_nestor, zaxis_nestor,
      &                  nuv, nuv3
       USE vmec_params, ONLY: ntmax, norm_term_flag
       USE realspace
@@ -16,6 +16,7 @@
       USE parallel_vmec_module, ONLY: SAXLASTNTYPE, ZEROLASTNTYPE,
      &                                SAXPBYLASTNTYPE
       USE blocktridiagonalsolver, ONLY: L_COLSCALE
+      USE dbgout
 
       IMPLICIT NONE
 C-----------------------------------------------
@@ -61,6 +62,12 @@ C-----------------------------------------------
 
 !     RIGID BODY SHIFT OF RMNCC(JS.GT.1,0,0) BY DELR_MSE= R00-RAXMSE
 !
+
+      if (open_dbg_context("totzsp_input", num_eqsolve_retries)) then
+        call add_real_5d("gc", 3, ntmax, ns, ntor1, mpol, pgc(:neqs),           &
+     &                   order=(/ 4, 5, 3, 2, 1 /) )
+        call close_dbg_out()
+      end if
 
 !     INVERSE FOURIER TRANSFORM TO S,THETA,ZETA SPACE
 !     R, Z, AND LAMBDA ARRAYS IN FOURIER SPACE
@@ -153,8 +160,8 @@ C-----------------------------------------------
          bcovar_time=bcovar_time+(tbcovoff - tbcovon)
 
       END IF ACTIVE1
-      
-      CALL MPI_BCast( ier_flag, 1, MPI_INTEGER, 0, 
+
+      CALL MPI_BCast( ier_flag, 1, MPI_INTEGER, 0,
      &                RUNVMEC_COMM_WORLD, MPI_ERR) !SAL 070719
 
 #if defined(MPI_OPT)
@@ -183,7 +190,7 @@ C-----------------------------------------------
      &    iter2 .GT. 1 .AND.
      &    iequi .EQ. 0) THEN
 
-         IF (ictrl_prec2d.LE.1 .AND. (fsqr + fsqz).LE.1.e-3_dp) 
+         IF (ictrl_prec2d.LE.1 .AND. (fsqr + fsqz).LE.1.e-3_dp)
      &      ivac = ivac+1   !decreased from e-1 to e-3 - sph12/04
 
          IF (nvskip0 .EQ. 0) nvskip0 = MAX(1, nvacskip)
@@ -216,7 +223,7 @@ C-----------------------------------------------
 !           FOR ictrl_prec2d = 1 (RUN WITH PRECONDITIONER APPLIED), MUST
 !           COMPUTE EXACT VACUUM RESPONSE NOW.
 !
-!           THE EXCEPTION TO THIS IS IF WE ARE TESTING THE HESSIAN (lHess_exact=T), 
+!           THE EXCEPTION TO THIS IS IF WE ARE TESTING THE HESSIAN (lHess_exact=T),
 !           THEN MUST USE FULL VACUUM CALCULATION TO COMPUTE IT (ivacskip=0)
 !
 !           lHess_exact = .FALSE.
@@ -231,7 +238,7 @@ C-----------------------------------------------
 
 !          NOTE: pgc contains correct edge values of r,z,l arrays
 !                convert_sym, convert_asym have been applied to m=1 modes
-          
+
             CALL convert_par(rmnc,zmns,lmns,rmns,zmnc,lmnc,pgc)
 
 !          DO NOT UPDATE THIS WHEN USING PRECONDITIONER: BREAKS TRI-DIAGONAL STRUCTURE
@@ -314,7 +321,7 @@ C-----------------------------------------------
 !          UNCOMMENT ALL "RPRES" COMMENTS HERE AND IN BCOVAR, FORCES ROUTINES
 !          IF NON-VARIATIONAL FORCES ARE DESIRED
 !
-!          presf_ns = 1.5_dp*pres(ns) - 0.5_dp*pres(ns1)  
+!          presf_ns = 1.5_dp*pres(ns) - 0.5_dp*pres(ns1)
 !          MUST NOT BREAK TRI-DIAGONAL RADIAL COUPLING: OFFENDS PRECONDITIONER!
             presf_ns = pmass(hs*(ns-1.5_dp))
             IF (presf_ns .NE. zero) THEN
@@ -384,7 +391,7 @@ C-----------------------------------------------
      &                         pru, prv, pz1, pzu, pzv, pextra3,
      &                         pextra4, pextra1, pextra2)
          END IF
-     
+
 !
 !     FOURIER-TRANSFORM MHD FORCES TO (M,N)-SPACE
 !
@@ -499,7 +506,7 @@ C-----------------------------------------------
 !Overwrites rzl_array, but that is OK since gc = rzl_array in CALL, xc preserved
       xtempa = xc
       CALL getrz(xc)
-#endif       
+#endif
       IF (ictrl_prec2d .EQ. 3) THEN
          gc(:neqs) = scalxc(:neqs)*(xc(:neqs)+xcdot(:neqs))
       ELSE
@@ -629,7 +636,7 @@ C-----------------------------------------------
 !           FOR ictrl_prec2d = 1 (RUN WITH PRECONDITIONER APPLIED), MUST
 !           COMPUTE EXACT VACUUM RESPONSE NOW.
 !
-!           THE EXCEPTION TO THIS IS IF WE ARE TESTING THE HESSIAN (lHess_exact=T), 
+!           THE EXCEPTION TO THIS IS IF WE ARE TESTING THE HESSIAN (lHess_exact=T),
 !           THEN MUST USE FULL VACUUM CALCULATION TO COMPUTE IT (ivacskip=0)
 !
 !           lHess_exact = .FALSE.
@@ -646,7 +653,7 @@ C-----------------------------------------------
             CALL convert (rmnc, zmns, lmns, rmns, zmnc, lmnc, gc, ns)
             IF (ictrl_prec2d.NE.3 .OR. l_edge) THEN
 #ifdef _VACUUM2
-               CALL vac2_vacuum(rmnc, rmns, zmns, zmnc, xm, xn, ctor, 
+               CALL vac2_vacuum(rmnc, rmns, zmns, zmnc, xm, xn, ctor,
      &                          ivacskip, mnmax)
 
 #else
@@ -657,7 +664,7 @@ C-----------------------------------------------
                   zaxis_nestor(1:nzeta) = z1(1:ns*nzeta:ns,0)
                END IF
 
-               CALL vacuum (rmnc, rmns, zmns, zmnc, xm, xn, 
+               CALL vacuum (rmnc, rmns, zmns, zmnc, xm, xn,
      &                      ctor, rbtor, wint, ns, ivacskip, ivac,
      &                      mnmax, ier_flag, lscreen)
                IF (ictrl_prec2d .EQ. 2) THEN
@@ -692,7 +699,7 @@ C-----------------------------------------------
 !           UNCOMMENT ALL "RPRES" COMMENTS HERE AND IN BCOVAR, FORCES ROUTINES
 !           IF NON-VARIATIONAL FORCES ARE DESIRED
 !
-!           presf_ns = 1.5_dp*pres(ns) - 0.5_dp*pres(ns1)  
+!           presf_ns = 1.5_dp*pres(ns) - 0.5_dp*pres(ns1)
 !           MUST NOT BREAK TRI-DIAGONAL RADIAL COUPLING: OFFENDS PRECONDITIONER!
             presf_ns = pmass(hs*(ns-1.5_dp))
             IF (presf_ns .ne. zero) THEN
@@ -709,16 +716,16 @@ C-----------------------------------------------
                gcon(l)     = bsqvac(lk) + pperp_ns(lk)
 #else
                gcon(l)     = bsqvac(lk) + presf_ns
-#endif 
+#endif
 
                rbsq(lk) = gcon(l)*(r1(l,0) + r1(l,1))*ohs
-               dbsq(lk) = ABS(gcon(l)-bsqsav(lk,3))  
+               dbsq(lk) = ABS(gcon(l)-bsqsav(lk,3))
             END DO
-!           
+!
 !           COMPUTE m=0,n=0 EDGE "pedestals"
 !
 !!            alphaR = hs*hs*ard(ns,1)
-!!            IF (alphaR .ne. zero) alphaR = 
+!!            IF (alphaR .ne. zero) alphaR =
 !!     &         hs*SUM(wint(ns:nrzt:ns)*zu0(ns:nrzt:ns)*rbsq)/alphaR
 
 !!            PRINT *,' alphaR/r1(ns) = ', alphaR/gcon(ns)
@@ -748,9 +755,9 @@ C-----------------------------------------------
       IF (iequi .NE. 1) THEN
          extra1(:nrzt,0) = (rcon(:nrzt,0) - rcon0(:nrzt))*ru0(:nrzt)
      &                   + (zcon(:nrzt,0) - zcon0(:nrzt))*zu0(:nrzt)
-         CALL alias (gcon, extra1(:,0), gc, gc(1+mns), gc(1+2*mns), 
+         CALL alias (gcon, extra1(:,0), gc, gc(1+mns), gc(1+2*mns),
      &               extra1(:,1))
-      ELSE 
+      ELSE
          IF (lrecon) xc(:ns) = xc(:ns) + delr_mse
          GOTO 100
       END IF
@@ -783,7 +790,7 @@ C-----------------------------------------------
 !
 !     FOURIER-TRANSFORM MHD FORCES TO (M,N)-SPACE
 !
-      CALL tomnsps (gc, armn, brmn, crmn, azmn, bzmn, czmn, 
+      CALL tomnsps (gc, armn, brmn, crmn, azmn, bzmn, czmn,
      &              blmn, clmn, rcon, zcon)
 
       IF (lasym) THEN
