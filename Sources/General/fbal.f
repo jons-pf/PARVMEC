@@ -7,14 +7,16 @@
 
       SUBROUTINE calc_fbal_par(bsubu, bsubv)
       USE vmec_main, ONLY: buco, bvco, equif, iequi,
-     1                     jcurv, jcuru, chipf, vp, pres, 
+     1                     jcurv, jcuru, chipf, vp, pres,
      2                     phipf, vpphi, presgrad, ohs
       USE vmec_params, ONLY: signgs
       USE vmec_dim, ONLY: ns, nrzt, nznt, ns1
       USE realspace, ONLY: pwint, phip
       USE vmec_input, ONLY: nzeta
       USE vmec_dim, ONLY: ntheta3
-      USE parallel_include_module 
+      USE parallel_include_module
+      USE dbgout
+
       IMPLICIT NONE
 !-----------------------------------------------
       REAL(dp), INTENT(in) :: bsubu(nznt,ns),
@@ -52,11 +54,32 @@
 
       !SKS-RANGE: All LHS's computed correctly in [t1lglob, trglob]
 
+      if (open_dbg_context("calc_fbal", num_eqsolve_retries)) then
+
+        ! first and last elements are uninitialized
+        ! and not needed during the iterations
+        jcurv   (1) = 0.0_dp ; jcurv   (ns) = 0.0_dp
+        jcuru   (1) = 0.0_dp ; jcuru   (ns) = 0.0_dp
+        vpphi   (1) = 0.0_dp ; vpphi   (ns) = 0.0_dp
+        presgrad(1) = 0.0_dp ; presgrad(ns) = 0.0_dp
+        equif   (1) = 0.0_dp ; equif   (ns) = 0.0_dp
+
+        call add_real_1d("buco",     ns-1, buco(2:ns))
+        call add_real_1d("bvco",     ns-1, bvco(2:ns))
+        call add_real_1d("jcurv",    ns,   jcurv)
+        call add_real_1d("jcuru",    ns,   jcuru)
+        call add_real_1d("vpphi",    ns,   vpphi)
+        call add_real_1d("presgrad", ns,   presgrad)
+        call add_real_1d("equif",    ns,   equif)
+
+        call close_dbg_out()
+      end if
+
       END SUBROUTINE calc_fbal_par
 
       SUBROUTINE calc_fbal(bsubu, bsubv)
-      USE vmec_main, ONLY: buco, bvco, equif, 
-     1                     jcurv, jcuru, chipf, vp, pres, 
+      USE vmec_main, ONLY: buco, bvco, equif,
+     1                     jcurv, jcuru, chipf, vp, pres,
      2                     phipf, vpphi, presgrad, ohs
 #ifdef _ANIMEC
      3                    ,pmap, pd, phot, tpotb, zero
