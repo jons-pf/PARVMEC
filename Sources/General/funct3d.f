@@ -93,8 +93,8 @@ C-----------------------------------------------
      &                       pextra2)
          END IF
 
-         if (open_dbg_context("funct3d_geometry", num_eqsolve_retries)) then
-
+         if (open_dbg_context("funct3d_geometry", num_eqsolve_retries))        &
+     &   then
              call add_real_4d("r1",   ns, 2, nzeta, ntheta3,   pr1,            &
      &                        order=(/ 3, 4, 1, 2 /) )
              call add_real_4d("ru",   ns, 2, nzeta, ntheta3,   pru,            &
@@ -115,7 +115,6 @@ C-----------------------------------------------
      &                        order=(/ 3, 4, 1, 2 /) )
              call add_real_4d("zcon", ns, 2, nzeta, ntheta3, pzcon,            &
      &                        order=(/ 3, 4, 1, 2 /) )
-
              call close_dbg_out()
          end if
 
