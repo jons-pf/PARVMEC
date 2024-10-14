@@ -60,8 +60,12 @@ C-----------------------------------------------
 !     COMPUTE INITIAL R, Z AND MAGNETIC FLUX PROFILES
 !
    20 CONTINUE
+
+!     !!! THIS must be the ONLY place where this gets incremented !!!
+      num_eqsolve_retries = num_eqsolve_retries + 1
+
 !
-!     RECOMPUTE INITIAL PROFILE, BUT WITH IMPROVED AXIS/OR RESTART 
+!     RECOMPUTE INITIAL PROFILE, BUT WITH IMPROVED AXIS/OR RESTART
 !     FROM INITIAL PROFILE, BUT WITH A SMALLER TIME-STEP
 !
       IF (irst .EQ. 2) THEN
