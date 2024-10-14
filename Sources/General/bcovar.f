@@ -19,6 +19,8 @@
       USE vmec_input, ONLY: nzeta
       USE vmec_dim, ONLY: ntheta3
       USE parallel_include_module
+      USE dbgout
+
       IMPLICIT NONE
 !-----------------------------------------------
 !   D u m m y   A r g u m e n t s
@@ -142,6 +144,27 @@
       pgvv(:,nsmin:nsmax) = pgvv(:,nsmin:nsmax)
      &                    + r12sq(:,nsmin:nsmax)
       pgvv(:,1) = 0
+
+      if (open_dbg_context("metric", num_eqsolve_retries)) then
+
+          call add_real_3d("gsqrt", ns, nzeta, ntheta3, gsqrt,                 &
+     &                     order = (/ 2, 3, 1 /) )
+          call add_real_3d("guu",   ns, nzeta, ntheta3, pguu,                  &
+     &                     order = (/ 2, 3, 1 /) )
+          call add_real_3d("r12sq", ns, nzeta, ntheta3, r12sq,                 &
+     &                     order = (/ 2, 3, 1 /) )
+          call add_real_3d("gvv",   ns, nzeta, ntheta3, pgvv,                  &
+     &                     order = (/ 2, 3, 1 /) )
+
+          if (lthreed) then
+            call add_real_3d("guv", ns, nzeta, ntheta3, pguv,                  &
+     &                       order = (/ 2, 3, 1 /) )
+          else
+            call add_null("guv")
+          end if
+
+          call close_dbg_out()
+      end if
 
 !CATCH THIS AFTER WHERE LINE BELOW phipog = 0
       nsmin = MAX(2,tlglob); nsmax = t1rglob
