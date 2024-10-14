@@ -220,6 +220,14 @@
          bsupv(:,1) =0; ! bsupv(ndim) = 0
       END IF
 
+      if (open_dbg_context("bcontrav", num_eqsolve_retries)) then
+        call add_real_3d("bsupu", ns, nzeta, ntheta3, bsupu,                   &
+     &                   order = (/ 2, 3, 1 /) )
+        call add_real_3d("bsupv", ns, nzeta, ntheta3, bsupv,                   &
+     &                   order = (/ 2, 3, 1 /) )
+        call close_dbg_out()
+      end if
+
 !
 !     UPDATE IOTA EITHER OF TWO WAYS:
 !     1)  FOR ictrl_prec2d = 0, SOLVE THE LINEAR ALGEBRAIC EQUATION <Bsubu> = icurv

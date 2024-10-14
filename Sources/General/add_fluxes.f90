@@ -4,6 +4,8 @@
       USE vmec_input, ONLY: nzeta
       USE vmec_dim, ONLY: ntheta3
       USE parallel_include_module
+      USE dbgout
+
       IMPLICIT NONE
 !-----------------------------------------------
 !   D u m m y   A r g u m e n t s
@@ -91,6 +93,18 @@
 
       nsmin=MAX(1,t1lglob); nsmax=MIN(ns,t1rglob)
       bsupu(:,nsmin:nsmax) = bsupu(:,nsmin:nsmax)+pchip(:,nsmin:nsmax)*overg(:,nsmin:nsmax)
+
+      if (open_dbg_context("add_fluxes", num_eqsolve_retries)) then
+
+        call add_real_1d("chips", ns-1, chips(2:ns)) ! half-grid
+        call add_real_1d("iotas", ns-1, iotas(2:ns)) ! half-grid
+        call add_real_1d("chipf", ns, chipf)
+        call add_real_1d("iotaf", ns, iotaf)
+
+        call add_real_3d("bsupu", ns, nzeta, ntheta3, bsupu, order = (/ 2, 3, 1 /) )
+
+        call close_dbg_out()
+      end if
 
       END SUBROUTINE add_fluxes_par
 
