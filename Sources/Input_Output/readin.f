@@ -9,6 +9,7 @@
       USE parallel_include_module, ONLY: grank, mgrid_file_read_time,
      &                                   LPRECOND
       USE parallel_vmec_module, ONLY: RUNVMEC_COMM_WORLD
+      USE dbgout
       IMPLICIT NONE
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
@@ -719,6 +720,52 @@ C-----------------------------------------------
       CALL MPI_Bcast(LPRECOND,1,MPI_LOGICAL,0,RUNVMEC_COMM_WORLD,            &
      &               MPI_ERR)
       readin_time = timer(tread)
+
+      if (open_dbg_context("readin_boundary")) then
+        if (.not. lasym) then
+          if (.not. lthreed) then
+            call add_real_2d("rbcc", ntor1, mpol, rbcc)
+            call add_real_2d("zbsc", ntor1, mpol, zbsc)
+            call add_null("rbss")
+            call add_null("zbcs")
+            call add_null("rbsc")
+            call add_null("zbcc")
+            call add_null("rbcs")
+            call add_null("zbss")
+          else
+            call add_real_2d("rbcc", ntor1, mpol, rbcc)
+            call add_real_2d("zbsc", ntor1, mpol, zbsc)
+            call add_real_2d("rbss", ntor1, mpol, rbss)
+            call add_real_2d("zbcs", ntor1, mpol, zbcs)
+            call add_null("rbsc")
+            call add_null("zbcc")
+            call add_null("rbcs")
+            call add_null("zbss")
+          end if
+        else
+          if (.not. lthreed) then
+            call add_real_2d("rbcc", ntor1, mpol, rbcc)
+            call add_real_2d("zbsc", ntor1, mpol, zbsc)
+            call add_null("rbss")
+            call add_null("zbcs")
+            call add_real_2d("rbsc", ntor1, mpol, rbsc)
+            call add_real_2d("zbcc", ntor1, mpol, zbcc)
+            call add_null("rbcs")
+            call add_null("zbss")
+          else
+            call add_real_2d("rbcc", ntor1, mpol, rbcc)
+            call add_real_2d("zbsc", ntor1, mpol, zbsc)
+            call add_real_2d("rbss", ntor1, mpol, rbss)
+            call add_real_2d("zbcs", ntor1, mpol, zbcs)
+            call add_real_2d("rbsc", ntor1, mpol, rbsc)
+            call add_real_2d("zbcc", ntor1, mpol, zbcc)
+            call add_real_2d("rbcs", ntor1, mpol, rbcs)
+            call add_real_2d("zbss", ntor1, mpol, zbss)
+          end if
+        end if
+
+        call close_dbg_out()
+      end if
 
       END SUBROUTINE readin
 
