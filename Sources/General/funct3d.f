@@ -107,9 +107,9 @@ C-----------------------------------------------
      &                        order=(/ 3, 4, 1, 2 /) )
              call add_real_4d("zv",   ns, 2, nzeta, ntheta3,   pzv,            &
      &                        order=(/ 3, 4, 1, 2 /) )
-             call add_real_4d("lu",   ns, 2, nzeta, ntheta3,   plu,            &
+             call add_real_4d("lu",   ns, 2, nzeta, ntheta3,    lu,            &
      &                        order=(/ 3, 4, 1, 2 /) )
-             call add_real_4d("lv",   ns, 2, nzeta, ntheta3,   plv,            &
+             call add_real_4d("lv",   ns, 2, nzeta, ntheta3,    lv,            &
      &                        order=(/ 3, 4, 1, 2 /) )
              call add_real_4d("rcon", ns, 2, nzeta, ntheta3, prcon,            &
      &                        order=(/ 3, 4, 1, 2 /) )
