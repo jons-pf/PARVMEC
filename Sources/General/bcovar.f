@@ -420,6 +420,22 @@
      &                 + p5*(1-lvv(:,ns))*bsubvh(:,ns)
       END IF
 
+      if (open_dbg_context("bcov_full", num_eqsolve_retries)) then
+
+        call add_real("rbtor0", rbtor0)
+        call add_real("rbtor",  rbtor)
+        call add_real("ctor",   ctor)
+
+        call add_real_1d("bdamp", ns, bdamp)
+
+        call add_real_3d("bsubu_e", ns, nzeta, ntheta3, bsubu_e,               &
+     &                   order = (/ 2, 3, 1 /) )
+        call add_real_3d("bsubv_e", ns, nzeta, ntheta3, bsubv_e,               &
+     &                   order = (/ 2, 3, 1 /) )
+
+        call close_dbg_out()
+      end if
+
 !
 !     COMPUTE R,Z AND LAMBDA PRE-CONDITIONING MATRIX
 !     ELEMENTS AND FORCE NORMS: NOTE THAT lu=>czmn, lv=>crmn externally
