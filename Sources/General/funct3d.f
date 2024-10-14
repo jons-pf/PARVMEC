@@ -63,11 +63,11 @@ C-----------------------------------------------
 !     RIGID BODY SHIFT OF RMNCC(JS.GT.1,0,0) BY DELR_MSE= R00-RAXMSE
 !
 
-      if (open_dbg_context("totzsp_input", num_eqsolve_retries)) then
-        call add_real_5d("gc", 3, ntmax, ns, ntor1, mpol, pgc(:neqs),           &
-     &                   order=(/ 4, 5, 3, 2, 1 /) )
-        call close_dbg_out()
-      end if
+         if (open_dbg_context("totzsp_input", num_eqsolve_retries)) then
+           call add_real_5d("gc", 3, ntmax, ns, ntor1, mpol, pgc(:neqs),           &
+     &                      order=(/ 4, 5, 3, 2, 1 /) )
+           call close_dbg_out()
+         end if
 
 !     INVERSE FOURIER TRANSFORM TO S,THETA,ZETA SPACE
 !     R, Z, AND LAMBDA ARRAYS IN FOURIER SPACE
@@ -92,6 +92,32 @@ C-----------------------------------------------
      &                       pbzmn, pextra4, pblmn, pclmn, pextra1,
      &                       pextra2)
          END IF
+
+         if (open_dbg_context("funct3d_geometry", num_eqsolve_retries)) then
+
+             call add_real_4d("r1",   ns, 2, nzeta, ntheta3,   pr1,            &
+     &                        order=(/ 3, 4, 1, 2 /) )
+             call add_real_4d("ru",   ns, 2, nzeta, ntheta3,   pru,            &
+     &                        order=(/ 3, 4, 1, 2 /) )
+             call add_real_4d("rv",   ns, 2, nzeta, ntheta3,   prv,            &
+     &                        order=(/ 3, 4, 1, 2 /) )
+             call add_real_4d("z1",   ns, 2, nzeta, ntheta3,   pz1,            &
+     &                        order=(/ 3, 4, 1, 2 /) )
+             call add_real_4d("zu",   ns, 2, nzeta, ntheta3,   pzu,            &
+     &                        order=(/ 3, 4, 1, 2 /) )
+             call add_real_4d("zv",   ns, 2, nzeta, ntheta3,   pzv,            &
+     &                        order=(/ 3, 4, 1, 2 /) )
+             call add_real_4d("lu",   ns, 2, nzeta, ntheta3,   plu,            &
+     &                        order=(/ 3, 4, 1, 2 /) )
+             call add_real_4d("lv",   ns, 2, nzeta, ntheta3,   plv,            &
+     &                        order=(/ 3, 4, 1, 2 /) )
+             call add_real_4d("rcon", ns, 2, nzeta, ntheta3, prcon,            &
+     &                        order=(/ 3, 4, 1, 2 /) )
+             call add_real_4d("zcon", ns, 2, nzeta, ntheta3, pzcon,            &
+     &                        order=(/ 3, 4, 1, 2 /) )
+
+             call close_dbg_out()
+         end if
 
 !      l0pi = ns*(1 + nzeta*(ntheta2 - 1))        !u = pi, v = 0, js = ns
 !      router = r1(ns,0) + r1(ns,1)
