@@ -176,8 +176,10 @@
       if (open_dbg_context("profil3d", num_eqsolve_retries)) then
 
         call add_real_3d("scalxc", ns, ntor1, mpol, pscalxc(:irzloff))
-        call add_real_4d("rmn", ntmax, ns, ntor1, mpol, rmn, order=(/ 2, 3, 4, 1 /) )
-        call add_real_4d("zmn", ntmax, ns, ntor1, mpol, zmn, order=(/ 2, 3, 4, 1 /) )
+        call add_real_4d("rmn", ntmax, ns, ntor1, mpol, rmn,                   &
+     &                   order=(/ 2, 3, 4, 1 /) )
+        call add_real_4d("zmn", ntmax, ns, ntor1, mpol, zmn,                   &
+     &                   order=(/ 2, 3, 4, 1 /) )
 
         call close_dbg_out()
       end if
