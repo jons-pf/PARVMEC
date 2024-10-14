@@ -4,9 +4,10 @@
       USE vmec_params, ONLY: meven, modd
       USE realspace
       USE vmec_dim, ONLY: ns, ntheta3
-      USE vforces, pr12 => parmn_o, pzu12 => parmn_e, pru12 => pazmn_e, 
+      USE vforces, pr12 => parmn_o, pzu12 => parmn_e, pru12 => pazmn_e,
      &             prs => pbzmn_e, pzs => pbrmn_e, ptau => pazmn_o
       USE parallel_include_module
+      USE dbgout
 
       IMPLICIT NONE
 C-----------------------------------------------
@@ -90,6 +91,28 @@ C-----------------------------------------------
          irst = 2
       END IF
 
+      if (open_dbg_context("jacobian", num_eqsolve_retries)) then
+
+        call add_real_3d("r12",  ns, nzeta, ntheta3, pr12,                     &
+     &                   order = (/ 2, 3, 1 /) )
+        call add_real_3d("ru12", ns, nzeta, ntheta3, pru12,                    &
+     &                   order = (/ 2, 3, 1 /) )
+        call add_real_3d("zu12", ns, nzeta, ntheta3, pzu12,                    &
+     &                   order = (/ 2, 3, 1 /) )
+        call add_real_3d("rs",   ns, nzeta, ntheta3, prs,                      &
+     &                   order = (/ 2, 3, 1 /) )
+        call add_real_3d("zs",   ns, nzeta, ntheta3, pzs,                      &
+     &                   order = (/ 2, 3, 1 /) )
+        call add_real_3d("tau",  ns, nzeta, ntheta3, ptau,                     &
+     &                   order = (/ 2, 3, 1 /) )
+
+        call add_real("taumax", taumax)
+        call add_real("taumin", taumin)
+        call add_int("irst", irst)
+
+        call close_dbg_out()
+      end if
+
       CALL second0(tjacoff)
       jacobian_time=jacobian_time+(tjacoff-tjacon)
 
@@ -100,7 +123,7 @@ C-----------------------------------------------
       USE vmec_params, ONLY: meven, modd
       USE realspace
       USE vmec_dim, ONLY: ns
-      USE vforces, r12 => armn_o, ru12 => azmn_e, zu12 => armn_e, 
+      USE vforces, r12 => armn_o, ru12 => azmn_e, zu12 => armn_e,
      &             rs => bzmn_e, zs => brmn_e, tau => azmn_o  !,z12 => blmn_e,
 
       IMPLICIT NONE
