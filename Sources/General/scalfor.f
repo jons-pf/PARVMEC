@@ -1,11 +1,13 @@
       SUBROUTINE scalfor_par(gcx, axm, bxm, axd, bxd, cx, iflag)
       USE vmec_main
       USE vmec_params
-      USE vmec_dim, ONLY: ns 
+      USE vmec_dim, ONLY: ns
       USE realspace, ONLY: wint, ru0
       USE parallel_include_module
       USE parallel_vmec_module, ONLY: PadSides1X
       USE xstuff, ONLY: pxc, pgc
+      USE dbgout
+
       IMPLICIT NONE
 C-----------------------------------------------
 C   Dummy Arguments
@@ -30,6 +32,7 @@ C-----------------------------------------------
       INTEGER :: MPI_STAT(MPI_STATUS_SIZE)
       REAL(dp) :: tridslvton, tridslvtoff
       REAL(dp) :: scalforton, scalfortoff
+      LOGICAL :: dbg_open
 C-----------------------------------------------
       IF (.NOT.lactive) RETURN
 
@@ -103,11 +106,11 @@ C-----------------------------------------------
 !     FSQ TOLERANCE LEVEL WHERE THIS KICKS IN (FTOL_EDGE), THE USER CAN
 !     TURN-OFF THIS FEATURE
 !
-!     DIAGONALIZE (DX DOMINANT) AND REDUCE FORCE (DX ENHANCED) AT EDGE 
+!     DIAGONALIZE (DX DOMINANT) AND REDUCE FORCE (DX ENHANCED) AT EDGE
 !     TO IMPROVE CONVERGENCE FOR N != 0 TERMS
 !
 
-!      ledge = .false.       
+!      ledge = .false.
 !      IF ((fsqr+fsqz) .lt. ftol_edge) ledge = .true.
 !      IF ((iter2-iter1).lt.400 .or. ivac.lt.1) ledge = .false.
 
@@ -117,6 +120,29 @@ C-----------------------------------------------
 
 !     FOR DATA MATCHING MODE (0 <= IRESIDUE < 3),
 !     MAGNETIC AXIS IS FIXED SO JMIN3(0) => 2 FOR M=0,N=0
+
+      ! check scalfor state == inputs to tridslv
+      ! prior knowledge about how this is called:
+      ! iflag = 0 --> R
+      ! iflag = 1 --> Z
+      dbg_open = .false.
+      if (iflag.eq.0) then
+        dbg_open = open_dbg_context("scalfor_R", num_eqsolve_retries)
+      end if
+      if (iflag.eq.1) then
+        if (dbg_open) then
+          stop "how can dbg_open be true here ?"
+        end if
+        dbg_open = open_dbg_context("scalfor_Z", num_eqsolve_retries)
+      end if
+
+      if (dbg_open) then
+        call add_real_3d("ax", ns, ntor1, mpol, ax, order = (/ 2, 3, 1 /))
+        call add_real_3d("bx", ns, ntor1, mpol, bx, order = (/ 2, 3, 1 /))
+        call add_real_3d("dx", ns, ntor1, mpol, dx, order = (/ 2, 3, 1 /))
+
+        call close_dbg_out()
+      end if ! open_dbg_context
 
       jmin4 = jmin3
       IF (iresidue .GE. 0 .AND. iresidue .LT. 3) THEN
@@ -137,7 +163,7 @@ C-----------------------------------------------
 
       END SUBROUTINE scalfor_par
 
-      SUBROUTINE bst_parallel_tridiag_solver(a, d, b, c, jmin, 
+      SUBROUTINE bst_parallel_tridiag_solver(a, d, b, c, jmin,
      1           jmax, mnd1, ns, nrhs)
       USE stel_kinds
       USE parallel_include_module
@@ -194,10 +220,10 @@ C-----------------------------------------------
       tmp=zero
       CALL second0(t2)
       init_time = init_time + (t2-t1)
-      
+
       CALL second0(t1)
       DO irow = tlglob, trglob
-        
+
          ! Set up L
          IF (irow .EQ. ns .AND. jmax .LT. ns) THEN
             b(:,irow) = 0
@@ -224,7 +250,7 @@ C-----------------------------------------------
       ALLOCATE(tmpv(0:mnd1))
       CALL second0(t1)
       DO jrhs = 1, nrhs
-        
+
         ! Set RHS
          DO irow = tlglob, trglob
            tmpv(0:mnd1)=c(:,irow,jrhs)
@@ -251,7 +277,7 @@ C-----------------------------------------------
       SUBROUTINE scalfor(gcx, axm, bxm, axd, bxd, cx, iflag)
       USE vmec_main
       USE vmec_params
-      USE vmec_dim, ONLY: ns 
+      USE vmec_dim, ONLY: ns
       USE realspace, ONLY: wint, ru0
 
       IMPLICIT NONE
@@ -341,11 +367,11 @@ C-----------------------------------------------
 !     FSQ TOLERANCE LEVEL WHERE THIS KICKS IN (FTOL_EDGE), THE USER CAN
 !     TURN-OFF THIS FEATURE
 !
-!     DIAGONALIZE (DX DOMINANT) AND REDUCE FORCE (DX ENHANCED) AT EDGE 
+!     DIAGONALIZE (DX DOMINANT) AND REDUCE FORCE (DX ENHANCED) AT EDGE
 !     TO IMPROVE CONVERGENCE FOR N != 0 TERMS
 !
 
-!      ledge = .false.       
+!      ledge = .false.
 !      IF ((fsqr+fsqz) .lt. ftol_edge) ledge = .true.
 !      IF ((iter2-iter1).lt.400 .or. ivac.lt.1) ledge = .false.
 
