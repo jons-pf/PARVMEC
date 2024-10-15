@@ -8,17 +8,19 @@
       USE parallel_include_module
       USE parallel_vmec_module, ONLY: CopyLastNtype
       USE vmec_params, ONLY: ntmax
+      USE dbgout
+
       IMPLICIT NONE
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
       INTEGER :: i0
       REAL(dp) :: delt0, w0
-      LOGICAL :: lscreen
+      LOGICAL :: lscreen, dbgout_printout
 C-----------------------------------------------
 C   L o c a l   P a r a m e t e r s
 C-----------------------------------------------
-      CHARACTER(LEN=*), PARAMETER :: 
+      CHARACTER(LEN=*), PARAMETER ::
 #ifdef _HBANGLE
      1   iter_line = "  ITER    FSQRHO   FSQ(m=0)    FSQL   ",
      1   iter_lines= "  ITER  FSQRHO   FSQ(m=0)    FSQL   ",
@@ -39,7 +41,7 @@ C-----------------------------------------------
       REAL(dp) :: betav, w, avm, den, tbroadon, tbroadoff
       REAL(dp), ALLOCATABLE :: bcastbuf(:)
       CHARACTER(len=LEN(iter_line) + LEN(fsq_line) +
-     1          LEN(raxis_line) + LEN(zaxis_line)) :: 
+     1          LEN(raxis_line) + LEN(zaxis_line)) ::
      2          print_line
       INTEGER :: i, j, k, l, lk
 C-----------------------------------------------
@@ -54,16 +56,23 @@ C-----------------------------------------------
       den = zero
       specw(1) = one
 
-      IF(PARVMEC) THEN 
+      IF(PARVMEC) THEN
         CALL CopyLastNtype(pxstore, pgc)
       ELSE
         gc = xstore
       END IF
 #ifdef _HBANGLE
       CALL getrz(gc)
-#endif 
+#endif
 
-      IF (PARVMEC) THEN 
+      dbgout_printout = open_dbg_context("printout", num_eqsolve_retries)
+      if (dbgout_printout) then
+        ! dump gc before it gets modified by spectrum() below
+        call add_real_5d("gc", 3, ntmax, ns, ntor1, mpol, gc,                  &
+     &                   order=(/ 4, 5, 3, 2, 1 /) )
+      end if ! dbgout_printout
+
+      IF (PARVMEC) THEN
         CALL spectrum_par (pgc(:irzloff), pgc(1+irzloff:2*irzloff))
         CALL Gather1XArray(vp)
         CALL Gather1XArray(specw)
@@ -109,10 +118,20 @@ C-----------------------------------------------
         END IF
       END IF
 
+      if (dbgout_printout) then
+        call add_real("betav", betav)
+        call add_real("avm", avm)
+        call add_real("delbsq", delbsq)
+
+        call add_real_1d("specw", ns, specw)
+
+        call close_dbg_out()
+      end if ! printout
+
       IF (i0.EQ.1 .AND. lfreeb) THEN
-         print_line = iter_lines // " " // raxis_line 
+         print_line = iter_lines // " " // raxis_line
          IF (lasym) print_line = TRIM(print_line) // " " // zaxis_line
-         IF (lscreen.AND.grank.EQ.0) 
+         IF (lscreen.AND.grank.EQ.0)
      1        PRINT 20, TRIM(print_line)//delt_line  !J Geiger 20101118
          print_line = iter_line // fsq_line // raxis_line
          IF (lasym) print_line = TRIM(print_line) // " " // zaxis_line
@@ -122,9 +141,9 @@ C-----------------------------------------------
            IF(grank.EQ.0) WRITE (nthreed, 16) TRIM(print_line)
          ENDIF
       ELSE IF (i0.eq.1 .and. .not.lfreeb) THEN
-         print_line = raxis_line 
+         print_line = raxis_line
          IF (lasym) print_line = raxis_line // zaxis_line
-         IF (lscreen.AND.grank.EQ.0) 
+         IF (lscreen.AND.grank.EQ.0)
      1      PRINT 30, iter_lines, TRIM(print_line)//delt_line !J Geiger 2010118
          print_line = iter_line // fsq_line // raxis_line // "     "
          IF (lasym) print_line = iter_line // fsq_line // raxis_line
@@ -139,13 +158,13 @@ C-----------------------------------------------
 
       IF (.not. lasym) THEN
          IF (.not.lfreeb) THEN
-            IF (lscreen.AND.grank.EQ.0) 
+            IF (lscreen.AND.grank.EQ.0)
      1        PRINT 45, i0, fsqr, fsqz, fsql, r00, delt0, w !J Geiger 20101118
             IF(grank.EQ.0) WRITE (nthreed, 40) i0, fsqr, fsqz, fsql,
      1      fsqr1, fsqz1, fsql1, delt0, r00, w, betav, avm
             RETURN
          ENDIF
-         IF (lscreen.AND.grank.EQ.0) 
+         IF (lscreen.AND.grank.EQ.0)
      1        PRINT 50, i0, fsqr, fsqz, fsql, r00, delt0, w,
      2                          delbsq !J Geiger 20101118
          IF (imatch_phiedge .eq. 1) THEN
@@ -157,17 +176,17 @@ C-----------------------------------------------
      1      fsqr1, fsqz1, fsql1, delt0, r00, w, betav,
      2      ABS(phiedge), delbsq, fedge
          ENDIF
-      
+
       ELSE
          IF (.not.lfreeb) THEN
-            IF (lscreen.AND.grank.EQ.0) 
+            IF (lscreen.AND.grank.EQ.0)
      1        PRINT 65, i0, fsqr, fsqz, fsql, r00, z00, !J Geiger 20101118
      2                             delt0, w !J Geiger 20101118
             IF(grank.EQ.0) WRITE (nthreed, 60) i0, fsqr, fsqz, fsql,
      1       fsqr1, fsqz1, fsql1, delt0, r00, z00, w, betav, avm
          RETURN
          ENDIF
-         IF (lscreen.AND.grank.EQ.0) 
+         IF (lscreen.AND.grank.EQ.0)
      1        PRINT 70, i0, fsqr, fsqz, fsql, r00, z00,
      2                          delt0, w, delbsq !J Geiger 20101118
          IF (imatch_phiedge .eq. 1) THEN
@@ -176,7 +195,7 @@ C-----------------------------------------------
      2        delbsq, fedge
          ELSE
             IF(grank.EQ.0) WRITE (nthreed, 60) i0, fsqr, fsqz, fsql,
-     1      fsqr1, fsqz1, fsql1, delt0, r00, z00, w, betav, 
+     1      fsqr1, fsqz1, fsql1, delt0, r00, z00, w, betav,
      2      ABS(phiedge), delbsq, fedge
          ENDIF
       END IF
