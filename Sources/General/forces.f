@@ -1,13 +1,15 @@
       SUBROUTINE forces_par
       USE vmec_main, p5 => cp5
       USE realspace
-      USE vforces, ru12 => pazmn_e, zu12 => parmn_e, 
+      USE vforces, ru12 => pazmn_e, zu12 => parmn_e,
      &             pazmn_e => pazmn_e, parmn_e => parmn_e,
      &             lv_e => pcrmn_e, lu_e => pczmn_e, lu_o => pczmn_o,
      &             pcrmn_e => pcrmn_e, pczmn_e => pczmn_e,
      &             pczmn_o => pczmn_o
       USE parallel_include_module
       USE timer_sub
+      USE dbgout
+
       IMPLICIT NONE
 C-----------------------------------------------
 C   L o c a l   P a r a m e t e r s
@@ -18,13 +20,70 @@ C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
       INTEGER :: l, ndim
       INTEGER :: i, j, k, nsmin, nsmax
-      REAL(dp), DIMENSION(:,:), POINTER :: 
+      REAL(dp), DIMENSION(:,:), POINTER ::
      &    bsqr, gvvs, guvs, guus
       REAL(dp), ALLOCATABLE, DIMENSION(:) :: bcastbuf
+      LOGICAL :: dbg_forces
 C-----------------------------------------------
       IF (.NOT.lactive .AND. .NOT.lfreeb) RETURN
 
       CALL second0 (tforon)
+
+      dbg_forces = open_dbg_context("forces", num_eqsolve_retries)
+      if (dbg_forces) then
+
+        call add_real_3d("lu_e",      ns, nzeta, ntheta3, lu_e,                &
+     &                   order = (/ 2, 3, 1 /) )
+        call add_real_3d("lv_e_in",   ns, nzeta, ntheta3, lv_e,                &
+     &                   order = (/ 2, 3, 1 /) )
+        call add_real_3d("guu_in",    ns, nzeta, ntheta3, pguu,                &
+     &                   order = (/ 2, 3, 1 /) )
+        call add_real_3d("guv_in",    ns, nzeta, ntheta3, pguv,                &
+     &                   order = (/ 2, 3, 1 /) )
+        call add_real_3d("gvv_in",    ns, nzeta, ntheta3, pgvv,                &
+     &                   order = (/ 2, 3, 1 /) )
+        call add_real_3d("ru12",      ns, nzeta, ntheta3, ru12,                &
+     &                   order = (/ 2, 3, 1 /) )
+        call add_real_3d("zu12",      ns, nzeta, ntheta3, zu12,                &
+     &                   order = (/ 2, 3, 1 /) )
+        call add_real_3d("brmn_e_in", ns, nzeta, ntheta3, pbrmn_e,             &
+     &                   order = (/ 2, 3, 1 /) )
+        call add_real_3d("bzmn_e_in", ns, nzeta, ntheta3, pbzmn_e,             &
+     &                   order = (/ 2, 3, 1 /) )
+        call add_real_3d("ru0",       ns, nzeta, ntheta3, pru0,                &
+     &                   order = (/ 2, 3, 1 /) )
+        call add_real_3d("zu0",       ns, nzeta, ntheta3, pzu0,                &
+     &                   order = (/ 2, 3, 1 /) )
+        call add_real_3d("rcon0",     ns, nzeta, ntheta3, prcon0,              &
+     &                   order = (/ 2, 3, 1 /) )
+        call add_real_3d("zcon0",     ns, nzeta, ntheta3, pzcon0,              &
+     &                   order = (/ 2, 3, 1 /) )
+        call add_real_3d("gcon",      ns, nzeta, ntheta3, pgcon,               &
+     &                   order = (/ 2, 3, 1 /) )
+
+        call add_real_4d("r1",   ns, 2, nzeta, ntheta3, pr1,                   &
+     &                   order=(/ 3, 4, 1, 2 /) )
+        call add_real_4d("z1",   ns, 2, nzeta, ntheta3, pz1,                   &
+     &                   order=(/ 3, 4, 1, 2 /) )
+        call add_real_4d("ru",   ns, 2, nzeta, ntheta3, pru,                   &
+     &                   order=(/ 3, 4, 1, 2 /) )
+        call add_real_4d("zu",   ns, 2, nzeta, ntheta3, pzu,                   &
+     &                   order=(/ 3, 4, 1, 2 /) )
+        call add_real_4d("rcon_in", ns, 2, nzeta, ntheta3, prcon,              &
+     &                   order=(/ 3, 4, 1, 2 /) )
+        call add_real_4d("zcon_in", ns, 2, nzeta, ntheta3, pzcon,              &
+     &                   order=(/ 3, 4, 1, 2 /) )
+
+        if (lthreed) then
+          call add_real_4d("rv", ns, 2, nzeta, ntheta3, prv,                   &
+     &                     order=(/ 3, 4, 1, 2 /) )
+          call add_real_4d("zv", ns, 2, nzeta, ntheta3, pzv,                   &
+     &                     order=(/ 3, 4, 1, 2 /) )
+        else
+          call add_null("rv")
+          call add_null("zv")
+        end if
+      end if ! dump_forces
 
       ndim = 1+nrzt
 
@@ -37,7 +96,7 @@ C-----------------------------------------------
       lu_e(:,1) = 0; lv_e(:,1) = 0
       pguu(:,1)  = 0; pguv(:,1)  = 0; pgvv(:,1) = 0
 
-      DO l = nsmin, nsmax      
+      DO l = nsmin, nsmax
          guus(:,l) = pguu(:,l)*pshalf(:,l)
          guvs(:,l) = pguv(:,l)*pshalf(:,l)
          gvvs(:,l) = pgvv(:,l)* pshalf(:,l)
@@ -86,10 +145,10 @@ C-----------------------------------------------
          pbzmn_e(:,l) = p5*(pbzmn_e(:,l) + pbzmn_e(:,l+1))
       END DO
 
-      parmn_e(:,ns) = - parmn_e(:,ns) + p5*lv_e(:,ns)  
+      parmn_e(:,ns) = - parmn_e(:,ns) + p5*lv_e(:,ns)
       pazmn_e(:,ns) = - pazmn_e(:,ns)
       pbrmn_e(:,ns) = p5*pbrmn_e(:,ns)
-      pbzmn_e(:,ns) = p5*pbzmn_e(:,ns) 
+      pbzmn_e(:,ns) = p5*pbzmn_e(:,ns)
 
       nsmin=tlglob; nsmax=t1rglob
       DO l = nsmin, nsmax
@@ -120,8 +179,18 @@ C-----------------------------------------------
      &                + p5*lv_e(:,ns)
       pazmn_o(:,ns) = - pazmn_o(:,ns) + pru(:,ns,0)*bsqr(:,ns)
       pbrmn_o(:,ns) = p5*pbrmn_o(:,ns)
-      pbzmn_o(:,ns) = p5*pbzmn_o(:,ns) 
+      pbzmn_o(:,ns) = p5*pbzmn_o(:,ns)
       lu_o(:,ns)   = lu_o(:,ns)
+
+      if (dbg_forces) then
+        ! save data before it gets overwritten again
+        ! due to array re-usage
+
+        call add_real_3d("lu_o",     ns, nzeta, ntheta3, lu_o,                 &
+     &                   order = (/ 2, 3, 1 /) )
+        call add_real_3d("lv_e_out", ns, nzeta, ntheta3, lv_e,                 &
+     &                   order = (/ 2, 3, 1 /) )
+      end if
 
       nsmin=tlglob; nsmax=trglob
       DO l = nsmin, nsmax
@@ -207,6 +276,63 @@ C-----------------------------------------------
          pzcon(:,l,1) = pzcon(:,l,0) * psqrts(:,l)
       END DO
 #endif
+
+      if (dbg_forces) then
+        call add_real_3d("armn_e", ns, nzeta, ntheta3, parmn_e,                &
+     &                   order = (/ 2, 3, 1 /) )
+        call add_real_3d("armn_o", ns, nzeta, ntheta3, parmn_o,                &
+     &                   order = (/ 2, 3, 1 /) )
+        call add_real_3d("brmn_e", ns, nzeta, ntheta3, pbrmn_e,                &
+     &                   order = (/ 2, 3, 1 /) )
+        call add_real_3d("brmn_o", ns, nzeta, ntheta3, pbrmn_o,                &
+     &                   order = (/ 2, 3, 1 /) )
+        call add_real_3d("azmn_e", ns, nzeta, ntheta3, pazmn_e,                &
+     &                   order = (/ 2, 3, 1 /) )
+        call add_real_3d("azmn_o", ns, nzeta, ntheta3, pazmn_o,                &
+     &                   order = (/ 2, 3, 1 /) )
+        call add_real_3d("bzmn_e", ns, nzeta, ntheta3, pbzmn_e,                &
+     &                   order = (/ 2, 3, 1 /) )
+        call add_real_3d("bzmn_o", ns, nzeta, ntheta3, pbzmn_o,                &
+     &                   order = (/ 2, 3, 1 /) )
+        if (lthreed) then
+          call add_real_3d("crmn_e", ns, nzeta, ntheta3, pcrmn_e,              &
+     &                     order = (/ 2, 3, 1 /) )
+          call add_real_3d("crmn_o", ns, nzeta, ntheta3, pcrmn_o,              &
+     &                     order = (/ 2, 3, 1 /) )
+          call add_real_3d("czmn_e", ns, nzeta, ntheta3, pczmn_e,              &
+     &                     order = (/ 2, 3, 1 /) )
+          call add_real_3d("czmn_o", ns, nzeta, ntheta3, pczmn_o,              &
+     &                     order = (/ 2, 3, 1 /) )
+        else
+          call add_null("crmn_e")
+          call add_null("crmn_o")
+          call add_null("czmn_e")
+          call add_null("czmn_o")
+        end if
+
+        call add_real_3d("guu_out",  ns, nzeta, ntheta3, pguu,                 &
+     &                   order = (/ 2, 3, 1 /) )
+        call add_real_3d("guus",     ns, nzeta, ntheta3, guus,                 &
+     &                   order = (/ 2, 3, 1 /) )
+        call add_real_3d("guv_out",  ns, nzeta, ntheta3, pguv,                 &
+     &                   order = (/ 2, 3, 1 /) )
+        call add_real_3d("guvs",     ns, nzeta, ntheta3, guvs,                 &
+     &                   order = (/ 2, 3, 1 /) )
+        call add_real_3d("gvv_out",  ns, nzeta, ntheta3, pgvv,                 &
+     &                   order = (/ 2, 3, 1 /) )
+        call add_real_3d("gvvs",     ns, nzeta, ntheta3, gvvs,                 &
+     &                   order = (/ 2, 3, 1 /) )
+        call add_real_3d("bsqr",     ns, nzeta, ntheta3, bsqr,                 &
+     &                   order = (/ 2, 3, 1 /) )
+
+        call add_real_4d("rcon_out", ns, 2, nzeta, ntheta3, prcon,             &
+     &                   order=(/ 3, 4, 1, 2 /) )
+        call add_real_4d("zcon_out", ns, 2, nzeta, ntheta3, pzcon,             &
+     &                   order=(/ 3, 4, 1, 2 /) )
+
+        call close_dbg_out()
+      end if
+
       CALL second0 (tforoff)
       timer(tfor) = timer(tfor) + (tforoff - tforon)
       forces_time = timer(tfor)
@@ -216,7 +342,7 @@ C-----------------------------------------------
       SUBROUTINE forces
       USE vmec_main, p5 => cp5
       USE realspace
-      USE vforces, ru12 => azmn_e, zu12 => armn_e, 
+      USE vforces, ru12 => azmn_e, zu12 => armn_e,
      &             azmn_e => azmn_e, armn_e => armn_e,
      &             lv_e => crmn_e, lu_e => czmn_e, lu_o => czmn_o,
      &             crmn_e => crmn_e, czmn_e => czmn_e, czmn_o => czmn_o
@@ -231,7 +357,7 @@ C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
       INTEGER :: l, ndim
-      REAL(dp), DIMENSION(:), POINTER :: 
+      REAL(dp), DIMENSION(:), POINTER ::
      &    bsqr, gvvs, guvs, guus
 
 C-----------------------------------------------
@@ -281,7 +407,7 @@ C-----------------------------------------------
       azmn_o(1:ndim)  = azmn_e(1:ndim) *shalf
       brmn_o(1:ndim)  = brmn_e(1:ndim) *shalf
       bzmn_o(1:ndim)  = bzmn_e(1:ndim) *shalf
-      
+
 !
 !     CONSTRUCT CYLINDRICAL FORCE KERNELS
 !     NOTE: presg(ns+1) == 0, AND WILL BE "FILLED IN" AT EDGE
@@ -341,25 +467,25 @@ C-----------------------------------------------
             guvs(l) = p5*(guvs(l) + guvs(l+1))
          END DO
 
-         brmn_e(:nrzt) = brmn_e(:nrzt) 
+         brmn_e(:nrzt) = brmn_e(:nrzt)
      &          - (guv(:nrzt)*rv(:nrzt,0) + guvs(:nrzt)*rv(:nrzt,1))
-         bzmn_e(:nrzt) = bzmn_e(:nrzt) 
+         bzmn_e(:nrzt) = bzmn_e(:nrzt)
      &          - (guv(:nrzt)*zv(:nrzt,0) + guvs(:nrzt)*zv(:nrzt,1))
-         crmn_e(:nrzt) = guv(:nrzt) *ru(:nrzt,0) 
+         crmn_e(:nrzt) = guv(:nrzt) *ru(:nrzt,0)
      &                 + gvv(:nrzt) *rv(:nrzt,0)
      &          + gvvs(:nrzt)*rv(:nrzt,1) + guvs(:nrzt)*ru(:nrzt,1)
-         czmn_e(:nrzt) = guv(:nrzt) *zu(:nrzt,0) 
+         czmn_e(:nrzt) = guv(:nrzt) *zu(:nrzt,0)
      &                 + gvv(:nrzt) *zv(:nrzt,0)
      &          + gvvs(:nrzt)*zv(:nrzt,1) + guvs(:nrzt)*zu(:nrzt,1)
          guv(:nrzt) = guv(:nrzt) *sqrts(:nrzt)*sqrts(:nrzt)
-         brmn_o(:nrzt) = brmn_o(:nrzt) 
+         brmn_o(:nrzt) = brmn_o(:nrzt)
      &          - (guvs(:nrzt)*rv(:nrzt,0) + guv(:nrzt)*rv(:nrzt,1))
-         bzmn_o(:nrzt) = bzmn_o(:nrzt) 
+         bzmn_o(:nrzt) = bzmn_o(:nrzt)
      &          - (guvs(:nrzt)*zv(:nrzt,0) + guv(:nrzt)*zv(:nrzt,1))
-         crmn_o(:nrzt) = guvs(:nrzt)*ru(:nrzt,0) 
+         crmn_o(:nrzt) = guvs(:nrzt)*ru(:nrzt,0)
      &                 + gvvs(:nrzt)*rv(:nrzt,0)
      &          + bsqr(:nrzt)*rv(:nrzt,1) + guv(:nrzt) *ru(:nrzt,1)
-         czmn_o(:nrzt) = guvs(:nrzt)*zu(:nrzt,0) 
+         czmn_o(:nrzt) = guvs(:nrzt)*zu(:nrzt,0)
      &                 + gvvs(:nrzt)*zv(:nrzt,0)
      &          + bsqr(:nrzt)*zv(:nrzt,1) + guv(:nrzt) *zu(:nrzt,1)
       ENDIF
@@ -368,13 +494,13 @@ C-----------------------------------------------
 !     ASSIGN EDGE FORCES (JS = NS) FOR FREE BOUNDARY CALCULATION
 !
       IF (ivac .ge. 1) THEN
-         armn_e(ns:nrzt:ns) = armn_e(ns:nrzt:ns) 
+         armn_e(ns:nrzt:ns) = armn_e(ns:nrzt:ns)
      &                      + zu0(ns:nrzt:ns)*rbsq(1:nznt)
-         armn_o(ns:nrzt:ns) = armn_o(ns:nrzt:ns) 
+         armn_o(ns:nrzt:ns) = armn_o(ns:nrzt:ns)
      &                      + zu0(ns:nrzt:ns)*rbsq(1:nznt)
-         azmn_e(ns:nrzt:ns) = azmn_e(ns:nrzt:ns) 
+         azmn_e(ns:nrzt:ns) = azmn_e(ns:nrzt:ns)
      &                      - ru0(ns:nrzt:ns)*rbsq(1:nznt)
-         azmn_o(ns:nrzt:ns) = azmn_o(ns:nrzt:ns) 
+         azmn_o(ns:nrzt:ns) = azmn_o(ns:nrzt:ns)
      &                      - ru0(ns:nrzt:ns)*rbsq(1:nznt)
 !         fz00_edge = SUM(wint(ns:nrzt:ns)*ru0(ns:nrzt:ns)*rbsq(1:nznt))
       ENDIF
@@ -397,7 +523,7 @@ C-----------------------------------------------
       rcon(:nrzt,1) = rcon(:nrzt,0) * sqrts(:nrzt)
       zcon(:nrzt,1) = zcon(:nrzt,0) * sqrts(:nrzt)
 #endif
-      
+
       CALL second0 (tforoff)
       timer(tfor) = timer(tfor) + (tforoff - tforon)
 
