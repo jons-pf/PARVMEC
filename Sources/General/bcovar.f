@@ -552,6 +552,26 @@
 !            tcon = p5*tcon
 !         END IF
 #endif
+
+         if (open_dbg_context("forceNorms_tcon", num_eqsolve_retries)) then
+
+           call add_real("volume", volume)
+           call add_real("r2",     MAX(wb,wp)/volume)
+           call add_real("fnorm",  fnorm)
+           call add_real("fnorm1",  fnorm1)
+           call add_real("fnormL",  fnormL)
+           call add_real("tcon0",  tcon0)
+           call add_real("tcon_mul",  tcon_mul)
+           call add_real_1d("tcon", ns-1, tcon(2:ns))
+
+           call add_real_3d("guu", ns, nzeta, ntheta3, pguu,                   &
+     &                      order = (/ 2, 3, 1 /) )
+           call add_real_5d("xc",  3, ntmax, ns, ntor1, mpol, pxc,              &
+                            order=(/ 4, 5, 3, 2, 1 /) )
+
+           call close_dbg_out()
+         end if
+
       ENDIF
 
       CALL MPI_ALLREDUCE(MPI_IN_PLACE,ier_flag,1,MPI_INTEGER,
