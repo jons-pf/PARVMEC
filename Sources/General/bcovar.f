@@ -473,6 +473,21 @@
      &                     pru(:,:,0), pru(:,:,1), pr1(:,:,1), azm,
      &                     azd, bzm, bzd, crd, rru_fac, sin01)
 
+         if (open_dbg_context("precondn", num_eqsolve_retries)) then
+
+           call add_real_2d("arm", ns+1, 2, arm)
+           call add_real_2d("ard", ns+1, 2, ard)
+           call add_real_2d("brm", ns+1, 2, brm)
+           call add_real_2d("brd", ns+1, 2, brd)
+           call add_real_1d("crd", ns+1,    crd)
+           call add_real_2d("azm", ns+1, 2, azm)
+           call add_real_2d("azd", ns+1, 2, azd)
+           call add_real_2d("bzm", ns+1, 2, bzm)
+           call add_real_2d("bzd", ns+1, 2, bzd)
+
+           call close_dbg_out()
+         end if
+
          nsmin = MAX(2,tlglob)
          nsmax = MIN(trglob,ns - 1)
          rzu_fac(nsmin:nsmax) = psqrts(1,nsmin:nsmax)

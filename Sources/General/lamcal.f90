@@ -3,6 +3,8 @@
       USE vmec_params, ONLY: ntmax, jlam, lamscale
       USE realspace, ONLY: psqrts
       USE parallel_include_module
+      USE dbgout
+
       IMPLICIT NONE
 !-----------------------------------------------
 !   D u m m y   A r g u m e n t s
@@ -16,7 +18,7 @@
 !-----------------------------------------------
 !   L o c a l   V a r i a b l e s
 !-----------------------------------------------
-      INTEGER :: m, n, js, nsmin, nsmax, numjs, i, j, k, l 
+      INTEGER :: m, n, js, nsmin, nsmax, numjs, i, j, k, l
       REAL(rprec) :: tnn, tnm, tmm, power, pfactor0, pfactor
 
       INTEGER :: blksize
@@ -83,6 +85,21 @@
       DO js = nsmin, nsmax
          pfaclam(0,0,js,1) = (pfactor0*lamscale**2)/blam(js)
       END DO
+
+      if (open_dbg_context("lamcal", num_eqsolve_retries)) then
+
+        call add_real("pfactor0", pfactor0)
+
+        call add_real_1d("blam", ns+1, blam)
+        call add_real_1d("clam", ns+1, clam)
+        call add_real_1d("dlam", ns+1, dlam)
+
+        call add_real_3d("faclam", ns, ntor+1, mpol,                           &
+                         pfaclam(0:ntor,0:mpol1,1:ns,1),                       &
+                         order = (/ 2, 3, 1 /) )
+
+        call close_dbg_out()
+      end if
 
       END SUBROUTINE lamcal_par
 
