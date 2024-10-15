@@ -9,6 +9,7 @@
       USE parallel_vmec_module, ONLY: tlglob_arr, trglob_arr,                  &
                                       lactive, SAXLASTNTYPE
       USE blocktridiagonalsolver, ONLY: L_COLSCALE
+      USE dbgout
 
       IMPLICIT NONE
 !-----------------------------------------------
