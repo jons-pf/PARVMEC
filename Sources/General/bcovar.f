@@ -553,7 +553,8 @@
 !         END IF
 #endif
 
-         if (open_dbg_context("forceNorms_tcon", num_eqsolve_retries)) then
+         if (open_dbg_context("forceNorms_tcon", num_eqsolve_retries))         &
+     &   then
 
            call add_real("volume", volume)
            call add_real("r2",     MAX(wb,wp)/volume)
