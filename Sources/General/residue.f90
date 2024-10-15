@@ -33,6 +33,7 @@
       REAL(dp), ALLOCATABLE, DIMENSION(:,:,:,:) :: send_buf
       REAL(dp), ALLOCATABLE, DIMENSION(:) :: recv_buf
       REAL(dp) :: tredon, tredoff
+      LOGICAL :: dbgout_scalfor_out
 !-----------------------------------------------
       CALL second0 (treson)
 
@@ -56,7 +57,7 @@
 !        XC(rss) = .5*(Rss + Zcs), XC(zcs) = .5*(Rss - Zcs) -> 0
 !        XC(rsc) = .5*(Rsc + Zcc), XC(zcc) = .5*(Rsc - Zcc) -> 0
 !     THIS IMPLIES THE CONSTRAINT
-!        3D ONLY : GC(zcs) = 0;  
+!        3D ONLY : GC(zcs) = 0;
 !        ASYM:     GC(zcc) = 0
 !
 
@@ -66,6 +67,18 @@
       IF (lasym) THEN
          CALL constrain_m1_par(gcr(:,m1,:,rsc), gcz(:,m1,:,zcc))
       END IF
+
+      if (open_dbg_context("phys_gc", num_eqsolve_retries)) then
+
+        call add_real_4d("gcr", ntmax, ns, ntor1, mpol, gcr,                   &
+                         order=(/ 3, 4, 2, 1 /) )
+        call add_real_4d("gcz", ntmax, ns, ntor1, mpol, gcz,                   &
+                         order=(/ 3, 4, 2, 1 /) )
+        call add_real_4d("gcl", ntmax, ns, ntor1, mpol, gcl,                   &
+                         order=(/ 3, 4, 2, 1 /) )
+
+        call close_dbg_out()
+      end if
 
       IF (lfreeb .AND. lrfp) THEN
          fac = 0
@@ -84,7 +97,7 @@
 !     COMPUTE INVARIANT RESIDUALS
 !
       r1 = one/(2*r0scale)**2
-      jedge = 0    
+      jedge = 0
       delIter = iter2-iter1
 
       IF (delIter       .lt. 50 .and.                                        &
@@ -103,11 +116,27 @@
       IF(rank .EQ. nranks-1) THEN
          fedge = r1*fnorm*SUM(gcr(:,:,ns,:)**2 + gcz(:,:,ns,:)**2)
       END IF
+
+      if (open_dbg_context("fsq", num_eqsolve_retries)) then
+
+        call add_real("r0scale", r0scale) ! TODO: move to debug output of fixaray
+        call add_real("r1", r1)
+        call add_real("fnorm", fnorm)
+        call add_real("fnormL", fnormL)
+        call add_int("jedge", jedge)
+        call add_real("fsqr", fsqr)
+        call add_real("fsqz", fsqz)
+        call add_real("fsql", fsql)
+        call add_real("fedge", fedge)
+
+        call close_dbg_out()
+      end if
+
 !
 !     PERFORM PRECONDITIONING AND COMPUTE RESIDUES
 !
       IF (ictrl_prec2d .EQ. 1) THEN
-         
+
          IF (l_colscale .AND. lactive) THEN
             CALL SAXLASTNTYPE(pgc, pcol_scale, pgc)
          END IF
@@ -143,10 +172,41 @@
             CALL scale_m1_par(gcr(:,m1,:,rsc), gcz(:,m1,:,zcc))
          END IF
 
+         ! dump forces after scale_m1 has been applied
+         if (open_dbg_context("scale_m1", num_eqsolve_retries)) then
+
+           call add_real_4d("gcr", ntmax, ns, ntor1, mpol, gcr,                &
+                            order=(/ 3, 4, 2, 1 /) )
+           call add_real_4d("gcz", ntmax, ns, ntor1, mpol, gcz,                &
+                            order=(/ 3, 4, 2, 1 /) )
+
+           call close_dbg_out()
+         end if
+
          jedge = 0
          CALL scalfor_par (gcr, arm, brm, ard, brd, crd, jedge)
          jedge = 1
          CALL scalfor_par (gcz, azm, bzm, azd, bzd, crd, jedge)
+
+         ! dump forces after scalfor has been applied
+         dbgout_scalfor_out = open_dbg_context("scalfor_out", num_eqsolve_retries)
+         if (dbgout_scalfor_out) then
+
+             call add_real_2d("arm", ns+1, 2, arm)
+             call add_real_2d("ard", ns+1, 2, ard)
+             call add_real_2d("brm", ns+1, 2, brm)
+             call add_real_2d("brd", ns+1, 2, brd)
+             call add_real_1d("crd", ns+1,    crd)
+             call add_real_2d("azm", ns+1, 2, azm)
+             call add_real_2d("azd", ns+1, 2, azd)
+             call add_real_2d("bzm", ns+1, 2, bzm)
+             call add_real_2d("bzd", ns+1, 2, bzd)
+
+             call add_real_4d("gcr", ntmax, ns, ntor1, mpol, gcr,              &
+                              order=(/ 3, 4, 2, 1 /) )
+             call add_real_4d("gcz", ntmax, ns, ntor1, mpol, gcz,              &
+                              order=(/ 3, 4, 2, 1 /) )
+         end if
 
          CALL getfsq_par (gcr, gcz, fsqr1, fsqz1, fnorm1, m1)
 
@@ -158,7 +218,25 @@
          ftotal = SUM(tmp2(2:ns))
          fsql1 = hs*ftotal
 
-         CALL PadSides(pgc)  
+         ! dump gcl only after preconditioner (faclam) is applied
+         if (dbgout_scalfor_out) then
+            call add_real_4d("gcl", ntmax, ns, ntor1, mpol, gcl,               &
+                             order=(/ 3, 4, 2, 1 /) )
+
+            call close_dbg_out()
+         end if
+
+         if (open_dbg_context("fsq1", num_eqsolve_retries)) then
+
+           call add_real("fnorm1", fnorm1)
+           call add_real("fsqr1", fsqr1)
+           call add_real("fsqz1", fsqz1)
+           call add_real("fsql1", fsql1)
+
+           call close_dbg_out()
+         end if
+
+         CALL PadSides(pgc)
 
       ENDIF
 
@@ -202,7 +280,7 @@
      &    ictrl_prec2d .NE. 0) THEN
          gcz(:,tlglob:trglob) = 0
       END IF
- 
+
       DEALLOCATE(temp)
       END SUBROUTINE constrain_m1_par
 
@@ -242,7 +320,7 @@
       DO n = 0, ntor
          gcz(n,tlglob:trglob) = fac(tlglob:trglob)*gcz(n,tlglob:trglob)
       END DO
- 
+
       END SUBROUTINE scale_m1_par
 
       SUBROUTINE residue (gcr, gcz, gcl)
@@ -299,7 +377,7 @@
 !        XC(rss) = .5*(Rss + Zcs), XC(zcs) = .5*(Rss - Zcs) -> 0
 !        XC(rsc) = .5*(Rsc + Zcc), XC(zcc) = .5*(Rsc - Zcc) -> 0
 !     THIS IMPLIES THE CONSTRAINT
-!        3D ONLY : GC(zcs) = 0;  
+!        3D ONLY : GC(zcs) = 0;
 !        ASYM:     GC(zcc) = 0
 !
 
@@ -331,7 +409,7 @@
 !     COMPUTE INVARIANT RESIDUALS
 !
       r1 = one/(2*r0scale)**2
-      jedge = 0    
+      jedge = 0
 !SPH-JAH013108: MUST INCLUDE EDGE FORCE (INITIALLY) FOR V3FITA TO WORK
 !ADD A V3FIT RELATED FLAG? ADD fsq criterion first
       delIter = iter2 - iter1
@@ -446,7 +524,7 @@
      &    ictrl_prec2d .NE. 0) THEN
          gcz = 0
       END IF
- 
+
       END SUBROUTINE constrain_m1
 
       SUBROUTINE scale_m1(gcr, gcz)
@@ -476,6 +554,6 @@
       DO n = 0, ntor
          gcz(:,n) = fac*gcz(:,n)
       END DO
- 
+
       END SUBROUTINE scale_m1
 
