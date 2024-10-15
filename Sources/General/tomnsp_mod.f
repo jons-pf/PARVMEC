@@ -4,7 +4,7 @@
 
       CONTAINS
 
-      SUBROUTINE tomnsps_par(frzl_array, armn, brmn, crmn, azmn, 
+      SUBROUTINE tomnsps_par(frzl_array, armn, brmn, crmn, azmn,
      &                       bzmn, czmn, blmn, clmn, arcon, azcon)
       USE realspace, ONLY: wint, phip
       USE vmec_main, p5 => cp5
@@ -14,6 +14,7 @@
       USE precon2d, ONLY: ictrl_prec2d
       USE parallel_include_module
       USE xstuff
+      USE dbgout
 !-----------------------------------------------
 !   D u m m y   A r g u m e n t s
 !-----------------------------------------------
@@ -26,8 +27,8 @@
 !-----------------------------------------------
       INTEGER, PARAMETER :: m0 = 0, m1 = 1, n0 = 0
       INTEGER :: jmax, m, mparity, i, n, k, l, nsz
-      INTEGER :: ioff, joff, mj, ni, nsl, j2, j2l, jl, jll, jmaxl 
-      REAL(dp), DIMENSION(:,:,:), POINTER :: 
+      INTEGER :: ioff, joff, mj, ni, nsl, j2, j2l, jl, jll, jmaxl
+      REAL(dp), DIMENSION(:,:,:), POINTER ::
      &           frcc, frss, fzcs, fzsc, flcs, flsc
       REAL(dp), ALLOCATABLE, DIMENSION(:,:,:) :: work1
       REAL(dp), DIMENSION(:,:), ALLOCATABLE   :: tempr, tempz
@@ -39,7 +40,7 @@
       frcc => frzl_array(:,:,:,rcc)               !!COS(mu) COS(nv)
       fzsc => frzl_array(:,:,:,zsc+ntmax)         !!SIN(mu) COS(nv)
       flsc => frzl_array(:,:,:,zsc+2*ntmax)       !!SIN(mu) COS(nv)
-      IF (lthreed) THEN 
+      IF (lthreed) THEN
          frss => frzl_array(:,:,:,rss)               !!SIN(mu) SIN(nv)
          fzcs => frzl_array(:,:,:,zcs+ntmax)         !!COS(mu) SIN(nv)
          flcs => frzl_array(:,:,:,zcs+2*ntmax)       !!COS(mu) SIN(nv)
@@ -225,6 +226,31 @@
 
       DEALLOCATE (work1, tempr, tempz)
 
+      if (open_dbg_context("tomnsps", num_eqsolve_retries)) then
+
+        call add_real_3d("frcc", ns, ntor1, mpol, frcc,                        &
+     &                   order = (/ 2, 3, 1 /) )
+        call add_real_3d("fzsc", ns, ntor1, mpol, fzsc,                        &
+     &                   order = (/ 2, 3, 1 /) )
+        call add_real_3d("flsc", ns, ntor1, mpol, flsc,                        &
+     &                   order = (/ 2, 3, 1 /) )
+
+        if (lthreed) then
+          call add_real_3d("frss", ns, ntor1, mpol, frss,                      &
+     &                   order = (/ 2, 3, 1 /) )
+          call add_real_3d("fzcs", ns, ntor1, mpol, fzcs,                      &
+     &                   order = (/ 2, 3, 1 /) )
+          call add_real_3d("flcs", ns, ntor1, mpol, flcs,                      &
+     &                   order = (/ 2, 3, 1 /) )
+        else
+          call add_null("frss")
+          call add_null("fzcs")
+          call add_null("flcs")
+        end if
+
+        call close_dbg_out()
+      end if
+
       CALL second0 (tfftoff)
       tomnsps_time = tomnsps_time + (tfftoff - tffton)
       timer(tffi) = timer(tffi) + (tfftoff - tffton)
@@ -247,8 +273,8 @@
 !   L o c a l   V a r i a b l e s
 !-----------------------------------------------
       INTEGER :: jmax, m, mparity, i, n, k, l
-      INTEGER :: ioff, joff, mj, ni, nsl, j2, j2l, jl, jll, jmaxl 
-      REAL(dp), DIMENSION(:,:,:), POINTER :: 
+      INTEGER :: ioff, joff, mj, ni, nsl, j2, j2l, jl, jll, jmaxl
+      REAL(dp), DIMENSION(:,:,:), POINTER ::
      &           frcs, frsc, fzcc, fzss, flcc, flss
 !      REAL(dp), DIMENSION(ns*nzeta) :: temp1, temp3
       REAL(dp), DIMENSION(:,:), ALLOCATABLE :: temp1, temp3
@@ -391,7 +417,7 @@
          END DO
       END DO
 
-!     IF THE SYMMETRIZED MODE USED, NEED EXTRA FACTOR OF 2 
+!     IF THE SYMMETRIZED MODE USED, NEED EXTRA FACTOR OF 2
 !     IF ntheta3 USED INSTEAD OF ntheta3, DO NOT NEED THIS FACTOR
 !      frzl_array(:,:,nsmin:nsmax,:) = 2*frzl_array(:,:,nsmin:nsmax,:)
 
@@ -402,7 +428,7 @@
 
       END SUBROUTINE tomnspa_par
 
-      SUBROUTINE tomnsps(frzl_array, armn, brmn, crmn, azmn, 
+      SUBROUTINE tomnsps(frzl_array, armn, brmn, crmn, azmn,
      1   bzmn, czmn, blmn, clmn, arcon, azcon)
       USE realspace, ONLY: wint, phip
       USE vmec_main, p5 => cp5
@@ -421,8 +447,8 @@
 !   L o c a l   V a r i a b l e s
 !-----------------------------------------------
       INTEGER :: jmax, m, mparity, i, n, k, l, nsz
-      INTEGER :: ioff, joff, mj, ni, nsl, j2, j2l, jl, jll, jmaxl 
-      REAL(dp), DIMENSION(:,:,:), POINTER :: 
+      INTEGER :: ioff, joff, mj, ni, nsl, j2, j2l, jl, jll, jmaxl
+      REAL(dp), DIMENSION(:,:,:), POINTER ::
      1           frcc, frss, fzcs, fzsc, flcs, flsc
       REAL(dp), ALLOCATABLE, DIMENSION(:,:) :: work1
       REAL(dp), DIMENSION(:), ALLOCATABLE   :: tempr, tempz
@@ -431,7 +457,7 @@
       frcc => frzl_array(:,:,:,rcc)               !!COS(mu) COS(nv)
       fzsc => frzl_array(:,:,:,zsc+ntmax)         !!SIN(mu) COS(nv)
       flsc => frzl_array(:,:,:,zsc+2*ntmax)       !!SIN(mu) COS(nv)
-      IF (lthreed) THEN 
+      IF (lthreed) THEN
          frss => frzl_array(:,:,:,rss)               !!SIN(mu) SIN(nv)
          fzcs => frzl_array(:,:,:,zcs+ntmax)         !!COS(mu) SIN(nv)
          flcs => frzl_array(:,:,:,zcs+2*ntmax)       !!COS(mu) SIN(nv)
@@ -474,20 +500,20 @@
             jll = l + 1
             nsl = nsz + l
             l = l + nsz
-            tempr(:) = armn(jll:nsl,mparity) 
+            tempr(:) = armn(jll:nsl,mparity)
 #ifndef _HBANGLE
      &               + xmpq(m,1)*arcon(jll:nsl,mparity)
 #endif
-            tempz(:) = azmn(jll:nsl,mparity) 
+            tempz(:) = azmn(jll:nsl,mparity)
 #ifndef _HBANGLE
      &               + xmpq(m,1)*azcon(jll:nsl,mparity)
 #endif
-            work1(:,1) = work1(:,1) + tempr(:)*cosmui(i,m) 
+            work1(:,1) = work1(:,1) + tempr(:)*cosmui(i,m)
      &                              + brmn(jll:nsl,mparity)*sinmumi(i,m)
             work1(:,7) = work1(:,7) + tempz(:)*sinmui(i,m)
      &                              + bzmn(jll:nsl,mparity)*cosmumi(i,m)
             work1(:,11)= work1(:,11)+ blmn(jll:nsl,mparity)*cosmumi(i,m)
- 
+
             IF (.not.lthreed) CYCLE
 
             work1(:,2) = work1(:,2) - crmn(jll:nsl,mparity)*cosmui(i,m)
@@ -596,8 +622,8 @@
 !   L o c a l   V a r i a b l e s
 !-----------------------------------------------
       INTEGER :: jmax, m, mparity, i, n, k, l
-      INTEGER :: ioff, joff, mj, ni, nsl, j2, j2l, jl, jll, jmaxl 
-      REAL(dp), DIMENSION(:,:,:), POINTER :: 
+      INTEGER :: ioff, joff, mj, ni, nsl, j2, j2l, jl, jll, jmaxl
+      REAL(dp), DIMENSION(:,:,:), POINTER ::
      &           frcs, frsc, fzcc, fzss, flcc, flss
       REAL(dp), DIMENSION(ns*nzeta) :: temp1, temp3
       REAL(dp), DIMENSION(:,:), ALLOCATABLE :: work1
@@ -642,7 +668,7 @@
 #ifndef _HBANGLE
      &               + xmpq(m,1)*azcon(:,i,mparity)
 #endif
-            work1(:,3) = work1(:,3) + temp1(:)*sinmui(i,m) 
+            work1(:,3) = work1(:,3) + temp1(:)*sinmui(i,m)
      &                              + brmn(:,i,mparity)*cosmumi(i,m)
             work1(:,5) = work1(:,5) + temp3(:)*cosmui(i,m)
      &                              + bzmn(:,i,mparity)*sinmumi(i,m)
@@ -701,7 +727,7 @@
          END DO
       END DO
 
-!     IF THE SYMMETRIZED MODE USED, NEED EXTRA FACTOR OF 2 
+!     IF THE SYMMETRIZED MODE USED, NEED EXTRA FACTOR OF 2
 !     IF ntheta3 USED INSTEAD OF ntheta3, DO NOT NEED THIS FACTOR
 !      frzl_array = 2*frzl_array
 
