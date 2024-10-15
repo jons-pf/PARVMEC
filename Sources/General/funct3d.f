@@ -402,6 +402,40 @@ C-----------------------------------------------
             GOTO 100
          END IF
 
+         if (open_dbg_context("constraint_force", num_eqsolve_retries))        &
+     &   then
+
+           call add_real_3d("rcon",  ns, nzeta, ntheta3, prcon(:,:,0),         &
+     &                      order = (/ 2, 3, 1 /) )
+           call add_real_3d("rcon0", ns, nzeta, ntheta3, prcon0,               &
+     &                      order = (/ 2, 3, 1 /) )
+           call add_real_3d("ru0",   ns, nzeta, ntheta3, pru0,                 &
+     &                      order = (/ 2, 3, 1 /) )
+
+           call add_real_3d("zcon",  ns, nzeta, ntheta3, pzcon(:,:,0),         &
+     &                      order = (/ 2, 3, 1 /) )
+           call add_real_3d("zcon0", ns, nzeta, ntheta3, pzcon0,               &
+     &                      order = (/ 2, 3, 1 /) )
+           call add_real_3d("zu0",   ns, nzeta, ntheta3, pzu0,                 &
+     &                      order = (/ 2, 3, 1 /) )
+
+           call add_real_3d("extra1", ns, nzeta, ntheta3,                      &
+     &                      pextra1(:,:,0), order = (/ 2, 3, 1 /) )
+           call add_real_3d("gcon",   ns, nzeta, ntheta3,                      &
+     &                      pgcon,          order = (/ 2, 3, 1 /) )
+
+           call add_real_3d("gcs", ns, ntor1, mpol,                            &
+     &                      pgc(0*mns+1:1*mns), order = (/ 2, 3, 1 /) )
+           call add_real_3d("gsc", ns, ntor1, mpol,                            &
+     &                      pgc(1*mns+1:2*mns), order = (/ 2, 3, 1 /) )
+           call add_real_3d("gcc", ns, ntor1, mpol,                            &
+     &                      pgc(2*mns+1:3*mns), order = (/ 2, 3, 1 /) )
+           call add_real_3d("gss", ns, ntor1, mpol,                            &
+     &                      pextra1(:,:,1),     order = (/ 2, 3, 1 /) )
+
+           call close_dbg_out()
+         end if
+
 !
 !     COMPUTE MHD FORCES ON INTEGER-MESH
 !
