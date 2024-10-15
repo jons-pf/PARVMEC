@@ -137,9 +137,12 @@ C-----------------------------------------------
       end if
 
       if (dbg_open) then
-        call add_real_3d("ax", ns, ntor1, mpol, ax, order = (/ 2, 3, 1 /))
-        call add_real_3d("bx", ns, ntor1, mpol, bx, order = (/ 2, 3, 1 /))
-        call add_real_3d("dx", ns, ntor1, mpol, dx, order = (/ 2, 3, 1 /))
+        call add_real_3d("ax", ns, ntor1, mpol, ax,                            &
+     &                   order = (/ 2, 3, 1 /))
+        call add_real_3d("bx", ns, ntor1, mpol, bx,                            &
+     &                   order = (/ 2, 3, 1 /))
+        call add_real_3d("dx", ns, ntor1, mpol, dx,                            &
+     &                   order = (/ 2, 3, 1 /))
 
         call close_dbg_out()
       end if ! open_dbg_context
