@@ -69,7 +69,7 @@ C-----------------------------------------------
      &                                   num_eqsolve_retries)
       if (dbgout_printout) then
         ! dump gc before it gets modified by spectrum() below
-        call add_real_5d("gc", 3, ntmax, ns, ntor1, mpol, gc,                  &
+        call add_real_5d("gc", 3, ntmax, ns, ntor1, mpol, pgc,                  &
      &                   order=(/ 4, 5, 3, 2, 1 /) )
       end if ! dbgout_printout
 
