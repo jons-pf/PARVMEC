@@ -65,7 +65,8 @@ C-----------------------------------------------
       CALL getrz(gc)
 #endif
 
-      dbgout_printout = open_dbg_context("printout", num_eqsolve_retries)
+      dbgout_printout = open_dbg_context("printout",                           &
+     &                                   num_eqsolve_retries)
       if (dbgout_printout) then
         ! dump gc before it gets modified by spectrum() below
         call add_real_5d("gc", 3, ntmax, ns, ntor1, mpol, gc,                  &
