@@ -566,8 +566,8 @@
 
            call add_real_3d("guu", ns, nzeta, ntheta3, pguu,                   &
      &                      order = (/ 2, 3, 1 /) )
-           call add_real_5d("xc",  3, ntmax, ns, ntor1, mpol, pxc,              &
-                            order=(/ 4, 5, 3, 2, 1 /) )
+           call add_real_5d("xc",  3, ntmax, ns, ntor1, mpol, pxc,             &
+     &                      order=(/ 4, 5, 3, 2, 1 /) )
 
            call close_dbg_out()
          end if
