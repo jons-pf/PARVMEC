@@ -219,11 +219,11 @@ C-----------------------------------------------
       ! debugging output: xc, xcdot, gc before time step; xc and xcdot also after time step
       dbg_evolve = open_dbg_context("evolve", num_eqsolve_retries)
       if (dbg_evolve) then
-        call add_real_5d("xc_before", 3, ntmax, ns, ntor1, mpol,            &
+        call add_real_5d("xc_before", 3, ntmax, ns, ntor1, mpol,               &
      &                   xc, order=(/ 4, 5, 3, 2, 1 /) )
         call add_real_5d("xcdot_before", 3, ntmax, ns, ntor1, mpol,            &
      &                   xcdot, order=(/ 4, 5, 3, 2, 1 /) )
-        call add_real_5d("gc", 3, ntmax, ns, ntor1, mpol,            &
+        call add_real_5d("gc", 3, ntmax, ns, ntor1, mpol,                      &
      &                   gc, order=(/ 4, 5, 3, 2, 1 /) )
       end if
 
@@ -244,7 +244,7 @@ C-----------------------------------------------
       END IF
 
       if (dbg_evolve) then
-        call add_real_5d("xc_after", 3, ntmax, ns, ntor1, mpol,             &
+        call add_real_5d("xc_after", 3, ntmax, ns, ntor1, mpol,                &
      &                   xc, order=(/ 4, 5, 3, 2, 1 /) )
         call add_real_5d("xcdot_after", 3, ntmax, ns, ntor1, mpol,             &
      &                   xcdot, order=(/ 4, 5, 3, 2, 1 /) )
