@@ -167,6 +167,7 @@ C-----------------------------------------------
          r0dot = ABS(r00 - r00s)/r00
          r00s = r00
          w1 = w0
+
          IF (ivac .eq. 1) THEN
             IF (grank .EQ. 0) THEN
               IF (lscreen) PRINT 110, iter2

@@ -1,4 +1,5 @@
       SUBROUTINE evolve(time_step, ier_flag, liter_flag, lscreen)
+      ! NOTE: time_step is INTENT(INOUT) and is passed `delt0r` -> could use `delt0r` instead...
       USE vmec_main
       USE vmec_params, ONLY: bad_jacobian_flag, successful_term_flag,
      &                       norm_term_flag
@@ -220,11 +221,11 @@ C-----------------------------------------------
       dbg_evolve = open_dbg_context("evolve", num_eqsolve_retries)
       if (dbg_evolve) then
         call add_real_5d("xc_before", 3, ntmax, ns, ntor1, mpol,               &
-     &                   xc, order=(/ 4, 5, 3, 2, 1 /) )
+     &                   pxc, order=(/ 4, 5, 3, 2, 1 /) )
         call add_real_5d("xcdot_before", 3, ntmax, ns, ntor1, mpol,            &
-     &                   xcdot, order=(/ 4, 5, 3, 2, 1 /) )
+     &                   pxcdot, order=(/ 4, 5, 3, 2, 1 /) )
         call add_real_5d("gc", 3, ntmax, ns, ntor1, mpol,                      &
-     &                   gc, order=(/ 4, 5, 3, 2, 1 /) )
+     &                   pgc, order=(/ 4, 5, 3, 2, 1 /) )
       end if
 
 !
@@ -245,9 +246,9 @@ C-----------------------------------------------
 
       if (dbg_evolve) then
         call add_real_5d("xc_after", 3, ntmax, ns, ntor1, mpol,                &
-     &                   xc, order=(/ 4, 5, 3, 2, 1 /) )
+     &                   pxc, order=(/ 4, 5, 3, 2, 1 /) )
         call add_real_5d("xcdot_after", 3, ntmax, ns, ntor1, mpol,             &
-     &                   xcdot, order=(/ 4, 5, 3, 2, 1 /) )
+     &                   pxcdot, order=(/ 4, 5, 3, 2, 1 /) )
 
         call close_dbg_out()
       end if
