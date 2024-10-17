@@ -3,14 +3,15 @@
       USE vmec_params, ONLY: bad_jacobian_flag, successful_term_flag,
      &                       norm_term_flag
       USE xstuff
-      USE precon2d, ONLY: ictrl_prec2d, l_comp_prec2D, 
+      USE precon2d, ONLY: ictrl_prec2d, l_comp_prec2D,
      &                    compute_blocks_par, compute_blocks
       USE parallel_include_module
-      USE parallel_vmec_module, ONLY: ZeroLastNType, CopyLastNtype, 
+      USE parallel_vmec_module, ONLY: ZeroLastNType, CopyLastNtype,
      &                                SaxpbyLastNtype, CompareEdgeValues
       USE timer_sub
       USE vmec_params, ONLY: ntmax
       USE gmres_mod
+      USE dbgout
 !  Comment Out below JDH 2010-08-03
 !      USE vmec_history
       IMPLICIT NONE
@@ -32,10 +33,11 @@
       INTEGER :: lcount
       INTEGER, SAVE :: iter_on
       REAL(dp) :: f3dt1, f3dt2, tevon, tevoff
+      LOGICAL :: dbg_evolve
 
 C-----------------------------------------------
 !     IF TROUBLE CONVERGING, TRY TO RECOMPUTE PRECONDITIONER ONCE MORE...
-!      IF (ictrl_prec2d.eq.1 .and. iter2.eq.(iter_on+40)) 
+!      IF (ictrl_prec2d.eq.1 .and. iter2.eq.(iter_on+40))
 !     1     ictrl_prec2d = 0
 
 !  JDH 2011-09-15 Add condition to lfinal_mesh, that iter2 - iter1 > 5
@@ -60,10 +62,10 @@ C-----------------------------------------------
          ictrl_prec2d = 0
          lqmr = .false.
          iter_on = -1
-      ELSE IF (lfinal_mesh .and. 
+      ELSE IF (lfinal_mesh .and.
      &         fsqr + fsqz + fsql .lt. prec2d_threshold) THEN
          lqmr = (itype_precon .GE. 2)
-         lfirst = (lqmr .AND. iter_on.EQ.-1) 
+         lfirst = (lqmr .AND. iter_on.EQ.-1)
 
 !
 !        INITIATES 2D PRECONDITIONER CALCULATION
@@ -214,12 +216,21 @@ C-----------------------------------------------
       b1  = one - dtau
       fac = one/(one + dtau)
 
+      ! debugging output: xc, xcdot, gc before time step; xc and xcdot also after time step
+      dbg_evolve = open_dbg_context("evolve", num_eqsolve_retries)
+      if (dbg_evolve) then
+        call add_real_5d("xc_before", 3, ntmax, ns, ntor1, mpol,            &
+     &                   xc, order=(/ 4, 5, 3, 2, 1 /) )
+        call add_real_5d("xcdot_before", 3, ntmax, ns, ntor1, mpol,            &
+     &                   xcdot, order=(/ 4, 5, 3, 2, 1 /) )
+        call add_real_5d("gc", 3, ntmax, ns, ntor1, mpol,            &
+     &                   gc, order=(/ 4, 5, 3, 2, 1 /) )
+      end if
+
 !
 !     THIS IS THE TIME-STEP ALGORITHM. IT IS ESSENTIALLY A CONJUGATE
 !     GRADIENT METHOD, WITHOUT THE LINE SEARCHES (FLETCHER-REEVES),
 !     BASED ON A METHOD GIVEN BY P. GARABEDIAN
-
-!
 
       IF (PARVMEC) THEN
          IF (lactive) THEN
@@ -231,6 +242,15 @@ C-----------------------------------------------
          xcdot = fac*(b1*xcdot + time_step*gc)
          xc    = xc + time_step*xcdot
       END IF
+
+      if (dbg_evolve) then
+        call add_real_5d("xc_after", 3, ntmax, ns, ntor1, mpol,             &
+     &                   xc, order=(/ 4, 5, 3, 2, 1 /) )
+        call add_real_5d("xcdot_after", 3, ntmax, ns, ntor1, mpol,             &
+     &                   xcdot, order=(/ 4, 5, 3, 2, 1 /) )
+
+        call close_dbg_out()
+      end if
 
       CALL second0(tevoff)
       evolve_time = evolve_time + (tevoff - tevon)
@@ -250,7 +270,7 @@ C-----------------------------------------------
       USE parallel_include_module, ONLY: rank
       USE realspace
       IMPLICIT NONE
-!     
+!
 !     STORES OR RETRIEVES XC STATE BASED ON IRST VALUE
 !
       REAL(dp), PARAMETER :: fact = 1.E4_dp
@@ -270,7 +290,7 @@ C-----------------------------------------------
 
 
 ! Store current state (irst=1)
-      IF (fsq.LE.res0 .AND. fsq0.LE.res1 .AND. irst.EQ.1) THEN 
+      IF (fsq.LE.res0 .AND. fsq0.LE.res1 .AND. irst.EQ.1) THEN
          CALL restart_iter(delt0r)
 
       ELSE IF (ictrl_prec2d .NE. 0) THEN
