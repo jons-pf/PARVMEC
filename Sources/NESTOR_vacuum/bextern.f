@@ -90,7 +90,7 @@ c
       if (dbgout_bextern) then
 
         ! axis geometry used in belicu
-        call add_real_2d("xpts_axis", 3, nvper * nv + 1, xpts)
+c        call add_real_2d("xpts_axis", 3, nvper * nv + 1, xpts)
 
         ! these are now mgrid + axis-current
         call add_real_2d("brad", nv, nu3, brad)
@@ -101,7 +101,7 @@ c
         call add_real_2d("bexv", nv, nu3, bexv)
         call add_real_2d("bexn", nv, nu3, bexn)
 
-        call add_real_2d("bexni", nv, nu3, bexni(:nuv2))
+        call add_real_2d("bexni", nv, nu3, bexni(:nuv3))
 
         call close_dbg_out()
       end if
