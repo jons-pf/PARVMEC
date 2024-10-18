@@ -2,8 +2,9 @@
       USE vacmod
       USE mgrid_mod, ONLY: bvac
       USE parallel_include_module
-      USE dbgout
+      USE vmec_main, ONLY: num_eqsolve_retries
       USE stel_constants, ONLY: mu0
+      USE dbgout
       IMPLICIT NONE
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
