@@ -215,8 +215,8 @@ C-----------------------------------------------
         call add_real_2d("potu", nv, nu3, potu, order=(/ 2, 1 /) )
         call add_real_2d("potv", nv, nu3, potv, order=(/ 2, 1 /) )
 
-        call add_real_2d("bsubu", nv, nu3, bsubu, order=(/ 2, 1 /) )
-        call add_real_2d("bsubv", nv, nu3, bsubv, order=(/ 2, 1 /) )
+c         call add_real_2d("bsubu", nv, nu3, bsubu, order=(/ 2, 1 /) )
+c         call add_real_2d("bsubv", nv, nu3, bsubv, order=(/ 2, 1 /) )
 
         call add_real_2d("bsqvac", nv, nu3, bsqvac, order=(/ 2, 1 /) )
 
