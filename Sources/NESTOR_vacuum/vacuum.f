@@ -5,9 +5,11 @@
       USE vparams, ONLY: nthreed, zero, one, mu0
       USE vmec_params, ONLY: norm_term_flag, phiedge_error_flag
       USE vmec_input, ONLY: lrfp         ! JDH Added 2013-11-25, to test for RFP
-      USE vmec_main, ONLY: nznt, irst
+      USE vmec_main, ONLY: nznt, irst, num_eqsolve_retries
       USE parallel_include_module
       USE timer_sub
+      USE dbgout
+
       IMPLICIT NONE
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
@@ -28,6 +30,7 @@ C-----------------------------------------------
       REAL(dp):: dn2, dm2, cosmn, sinmn, huv, hvv,
      &           det, bsubuvac, fac, ton, toff
       REAL(dp) :: tmp1(2), tmp2(2)
+      LOGICAL :: dbgout_vac1n_solver
 C-----------------------------------------------
 !
 !     THIS ROUTINE COMPUTES .5 * B**2 ON THE VACUUM / PLASMA SURFACE
@@ -41,6 +44,39 @@ C-----------------------------------------------
 !
       CALL second0(tvacon)
       IF (.NOT.ALLOCATED(potvac)) STOP 'POTVAC not ALLOCATED in VACCUM'
+
+      ! write inputs to NESTOR
+      if (open_dbg_context("vac1n_vacuum", num_eqsolve_retries)) then
+
+        call add_real_1d("rmnc", mnmax, rmnc)
+        call add_real_1d("zmns", mnmax, zmns)
+        if (lasym) then
+          call add_real_1d("rmns", mnmax, rmns)
+          call add_real_1d("zmnc", mnmax, zmnc)
+        else
+          call add_null("rmns")
+          call add_null("zmnc")
+        end if
+        call add_real_1d("xm", mnmax, xm)
+        call add_real_1d("xn", mnmax, xn)
+
+        call add_real("plascur", plascur)
+        call add_real("rbtor",   rbtor)
+
+        call add_real_2d("wint", nv, nu3, wint, order = (/ 2, 1 /))
+
+        call add_int("ivac_skip", ivac_skip)
+        call add_int("ivac",      ivac)
+        call add_int("mnmax",     mnmax)
+        call add_int("ier_flag",  ier_flag)
+        call add_logical("lasym", lasym)
+        call add_real("signgs",   signgs)
+
+        call add_real_1d("raxis_nestor", nv, raxis_nestor)
+        call add_real_1d("zaxis_nestor", nv, zaxis_nestor)
+
+        call close_dbg_out()
+      end if
 
       ALLOCATE (amatrix(mnpd2*mnpd2), potu(nuv3), potv(nuv3), stat=i)
       IF (i .NE. 0) STOP 'Allocation error in vacuum'
@@ -98,6 +134,13 @@ C-----------------------------------------------
       CALL second0(toff)
       timer_vac(tscal) = timer_vac(tscal) + (toff-ton)
 
+      dbgout_vac1n_solver = open_dbg_context("vac1n_solver",                   &
+     &                                       num_eqsolve_retries)
+      if (dbgout_vac1n_solver) then
+        call add_real_2d("amatrix", mnpd2, mnpd2, amatrix)
+        call add_real_1d("potvac_in", mnpd2, potvac)
+      end if
+
       ton = toff
       info = 0
       CALL dgetrs('No transpose', mnpd2, 1, amatrix, mnpd2,
@@ -108,6 +151,12 @@ C-----------------------------------------------
       solver_time = solver_time + (toff - ton)
 
       IF (info .NE. 0) STOP 'Error in solver in VACUUM'
+
+      if (dbgout_vac1n_solver) then
+        call add_real_1d("potvac_out", mnpd2, potvac)
+
+        call close_dbg_out()
+      end if
 !
 !       compute tangential covariant (sub u,v) and contravariant
 !       (super u,v) magnetic field components on the plasma surface
@@ -153,6 +202,31 @@ C-----------------------------------------------
          bphiv(i) = r1b(i)*bsupv_sur(i)
          bzv(i) = zub(i)*bsupu_sur(i) + zvb(i)*bsupv_sur(i)
       END DO
+
+      if (open_dbg_context("vac1n_bsqvac", num_eqsolve_retries)) then
+
+        call add_real_1d("potsin", mnpd, potsin)
+        if (lasym) then
+          call add_real_1d("potcos", mnpd, potcos)
+        else
+          call add_null("potcos")
+        end if
+
+        call add_real_2d("potu", nv, nu3, potu, order=(/ 2, 1 /) )
+        call add_real_2d("potv", nv, nu3, potv, order=(/ 2, 1 /) )
+
+        call add_real_2d("bsubu", nv, nu3, bsubu, order=(/ 2, 1 /) )
+        call add_real_2d("bsubv", nv, nu3, bsubv, order=(/ 2, 1 /) )
+
+        call add_real_2d("bsqvac", nv, nu3, bsqvac, order=(/ 2, 1 /) )
+
+        call add_real_2d("brv",   nv, nu3, brv,   order=(/ 2, 1 /) )
+        call add_real_2d("bphiv", nv, nu3, bphiv, order=(/ 2, 1 /) )
+        call add_real_2d("bzv",   nv, nu3, bzv,   order=(/ 2, 1 /) )
+
+        call close_dbg_out()
+      end if
+
 !
 !       PRINT OUT VACUUM PARAMETERS
 !
