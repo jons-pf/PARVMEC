@@ -2,6 +2,7 @@
       USE vacmod
       USE mgrid_mod, ONLY: bvac
       USE parallel_include_module
+      USE dbgout
       IMPLICIT NONE
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
@@ -15,6 +16,7 @@ C-----------------------------------------------
       INTEGER  :: i, k
       REAL(dp), ALLOCATABLE :: brad(:), bphi(:), bz(:)
       REAL(dp) :: tbexon, tbexoff
+      LOGICAL :: dbgout_bextern
 C-----------------------------------------------
 c
 c  exterior Neumann problem
@@ -35,6 +37,20 @@ c
       CALL becoil (r1b,z1b,brad,bphi,bz,bvac(1,1),bvac(1,2),bvac(1,3),         &
      &             lscreen)
 
+      dbgout_bextern = open_dbg_context("vac1n_bextern",                       &
+     &                                  num_eqsolve_retries)
+      if (dbgout_bextern) then
+
+        ! these are only from the mgrid at this point
+        call add_real_2d("mgrid_brad", nv, nu3, brad)
+        call add_real_2d("mgrid_bphi", nv, nu3, bphi)
+        call add_real_2d("mgrid_bz",   nv, nu3, bz)
+
+        ! This should be in Amperes.
+        call add_real("axis_current", plascur/mu0)
+
+      end if ! dbgout_bextern
+
 !
 !     COMPUTE B (ON PLASMA BOUNDARY) FROM NET TOROIDAL PLASMA CURRENT
 !     THE NET CURRENT IS MODELLED AS A WIRE AT THE MAGNETIC AXIS, AND THE
@@ -52,7 +68,7 @@ c
       END DO
 
 !
-!     COMPUTE COVARIANT COMPONENTS OF EXTERNAL FIELD: BEXU = B0 dot dx/du, 
+!     COMPUTE COVARIANT COMPONENTS OF EXTERNAL FIELD: BEXU = B0 dot dx/du,
 !     BEXV = B0 dot dx/dv. HERE, BEXN = -B0*SURF_NORM CORRESPONDS TO THE
 !     "exterior Neumann problem" convention of PKM (sign flipped as noted in PKM)
 !     THUS, THE UNIT NORMAL SHOULD POINT INTO THE PLASMA (OUTWARD FROM VACUUM),
@@ -68,6 +84,25 @@ c
 !     NOTE: BEXN == NP*F = -B0 dot [Xu cross Xv] NP        (see PKM, Eq. 2.13)
         bexni(i) = bexn(i)*wint(i)*pi2*pi2
       END DO
+
+      if (dbgout_bextern) then
+
+        ! axis geometry used in belicu
+        call add_real_2d("xpts_axis", 3, nvper * nv + 1, xpts)
+
+        ! these are now mgrid + axis-current
+        call add_real_2d("brad", nv, nu3, brad)
+        call add_real_2d("bphi", nv, nu3, bphi)
+        call add_real_2d("bz",   nv, nu3, bz)
+
+        call add_real_2d("bexu", nv, nu3, bexu)
+        call add_real_2d("bexv", nv, nu3, bexv)
+        call add_real_2d("bexn", nv, nu3, bexn)
+
+        call add_real_2d("bexni", nv, nu3, bexni(:nuv2))
+
+        call close_dbg_out()
+      end if
 
       DEALLOCATE (brad, bphi, bz)
 
