@@ -63,7 +63,7 @@ C-----------------------------------------------
         call add_real("plascur", plascur)
         call add_real("rbtor",   rbtor)
 
-        call add_real_2d("wint", nv, nu3, wint, order = (/ 2, 1 /))
+        call add_real_2d("wint", nv, nu3, wint)
 
         call add_int("ivac_skip", ivac_skip)
         call add_int("ivac",      ivac)
@@ -212,17 +212,17 @@ C-----------------------------------------------
           call add_null("potcos")
         end if
 
-        call add_real_2d("potu", nv, nu3, potu, order=(/ 2, 1 /) )
-        call add_real_2d("potv", nv, nu3, potv, order=(/ 2, 1 /) )
+        call add_real_2d("potu", nv, nu3, potu)
+        call add_real_2d("potv", nv, nu3, potv)
 
-c         call add_real_2d("bsubu", nv, nu3, bsubu, order=(/ 2, 1 /) )
-c         call add_real_2d("bsubv", nv, nu3, bsubv, order=(/ 2, 1 /) )
+c         call add_real_2d("bsubu", nv, nu3, bsubu)
+c         call add_real_2d("bsubv", nv, nu3, bsubv)
 
-        call add_real_2d("bsqvac", nv, nu3, bsqvac, order=(/ 2, 1 /) )
+        call add_real_2d("bsqvac", nv, nu3, bsqvac)
 
-        call add_real_2d("brv",   nv, nu3, brv,   order=(/ 2, 1 /) )
-        call add_real_2d("bphiv", nv, nu3, bphiv, order=(/ 2, 1 /) )
-        call add_real_2d("bzv",   nv, nu3, bzv,   order=(/ 2, 1 /) )
+        call add_real_2d("brv",   nv, nu3, brv)
+        call add_real_2d("bphiv", nv, nu3, bphiv)
+        call add_real_2d("bzv",   nv, nu3, bzv)
 
         call close_dbg_out()
       end if

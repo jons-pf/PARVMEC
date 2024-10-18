@@ -136,38 +136,38 @@ C-----------------------------------------------
       END DO
 
       if (open_dbg_context("vac1n_surface", num_eqsolve_retries)) then
-        call add_real_2d("r1b", nv, nu,  r1b, order = (/ 2, 1 /) ) ! nu !
-        call add_real_2d("rub", nv, nu3, rub, order = (/ 2, 1 /) )
-        call add_real_2d("rvb", nv, nu3, rvb, order = (/ 2, 1 /) )
-        call add_real_2d("ruu", nv, nu3, ruu, order = (/ 2, 1 /) )
-        call add_real_2d("ruv", nv, nu3, ruv, order = (/ 2, 1 /) )
-        call add_real_2d("rvv", nv, nu3, rvv, order = (/ 2, 1 /) )
+        call add_real_2d("r1b", nv, nu,  r1b) ! nu !
+        call add_real_2d("rub", nv, nu3, rub)
+        call add_real_2d("rvb", nv, nu3, rvb)
+        call add_real_2d("ruu", nv, nu3, ruu)
+        call add_real_2d("ruv", nv, nu3, ruv)
+        call add_real_2d("rvv", nv, nu3, rvv)
 
-        call add_real_2d("z1b", nv, nu,  z1b, order = (/ 2, 1 /) ) ! nu !
-        call add_real_2d("zub", nv, nu3, zub, order = (/ 2, 1 /) )
-        call add_real_2d("zvb", nv, nu3, zvb, order = (/ 2, 1 /) )
-        call add_real_2d("zuu", nv, nu3, zuu, order = (/ 2, 1 /) )
-        call add_real_2d("zuv", nv, nu3, zuv, order = (/ 2, 1 /) )
-        call add_real_2d("zvv", nv, nu3, zvv, order = (/ 2, 1 /) )
+        call add_real_2d("z1b", nv, nu,  z1b) ! nu !
+        call add_real_2d("zub", nv, nu3, zub)
+        call add_real_2d("zvb", nv, nu3, zvb)
+        call add_real_2d("zuu", nv, nu3, zuu)
+        call add_real_2d("zuv", nv, nu3, zuv)
+        call add_real_2d("zvv", nv, nu3, zvv)
 
-        call add_real_2d("guu_b", nv, nu3, guu_b, order = (/ 2, 1 /) )
-        call add_real_2d("guv_b", nv, nu3, guv_b, order = (/ 2, 1 /) )
-        call add_real_2d("gvv_b", nv, nu3, gvv_b, order = (/ 2, 1 /) )
+        call add_real_2d("guu_b", nv, nu3, guu_b)
+        call add_real_2d("guv_b", nv, nu3, guv_b)
+        call add_real_2d("gvv_b", nv, nu3, gvv_b)
 
-        call add_real_2d("rzb2", nv, nu, rzb2, order = (/ 2, 1 /) ) ! nu !
+        call add_real_2d("rzb2", nv, nu, rzb2) ! nu !
 
-        call add_real_2d("snr", nv, nu3, snr, order = (/ 2, 1 /) )
-        call add_real_2d("snv", nv, nu3, snv, order = (/ 2, 1 /) )
-        call add_real_2d("snz", nv, nu3, snz, order = (/ 2, 1 /) )
+        call add_real_2d("snr", nv, nu3, snr)
+        call add_real_2d("snv", nv, nu3, snv)
+        call add_real_2d("snz", nv, nu3, snz)
 
-        call add_real_2d("drv", nv, nu3, drv, order = (/ 2, 1 /) )
+        call add_real_2d("drv", nv, nu3, drv)
 
-        call add_real_2d("auu", nv, nu3, auu, order = (/ 2, 1 /) )
-        call add_real_2d("auv", nv, nu3, auv, order = (/ 2, 1 /) )
-        call add_real_2d("avv", nv, nu3, avv, order = (/ 2, 1 /) )
+        call add_real_2d("auu", nv, nu3, auu)
+        call add_real_2d("auv", nv, nu3, auv)
+        call add_real_2d("avv", nv, nu3, avv)
 
-        call add_real_2d("rcosuv", nv, nu, rcosuv, order = (/ 2, 1 /) ) ! nu !
-        call add_real_2d("rsinuv", nv, nu, rsinuv, order = (/ 2, 1 /) ) ! nu !
+        call add_real_2d("rcosuv", nv, nu, rcosuv) ! nu !
+        call add_real_2d("rsinuv", nv, nu, rsinuv) ! nu !
 
         call close_dbg_out()
       end if
