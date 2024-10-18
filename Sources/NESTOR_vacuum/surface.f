@@ -1,6 +1,9 @@
       SUBROUTINE surface(rc, rs, zs, zc, xm, xn, mnmax)
       USE vacmod
       USE parallel_include_module
+      USE vmec_main, ONLY: num_eqsolve_retries
+      USE dbgout
+
       IMPLICIT NONE
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
@@ -34,7 +37,7 @@ C-----------------------------------------------
       IF (i .ne. 0) STOP 'Allocation error in SURFACE'
 
       r1b = 0; z1b = 0
-      DO i = nuv3min, nuv3max  
+      DO i = nuv3min, nuv3max
          zub(i) = 0;   zvb(i) = 0;  zuu(i) = 0; zuv(i) = 0; zvv(i) = 0
          rub(i) = 0;   rvb(i) = 0;  ruu(i) = 0; ruv(i) = 0; rvv(i) = 0
       END DO
@@ -88,7 +91,7 @@ C-----------------------------------------------
 !     COMPUTE METRIC COEFFICIENTS GIJ_B AND SURFACE NORMAL COMPONENTS
 !     [SNR, SNV, SNZ] = NP*[Xu cross Xv]
 !
-!     NOTE: These should be multiplied by -signgs to point OUTWARD from vacuum INTO plasma 
+!     NOTE: These should be multiplied by -signgs to point OUTWARD from vacuum INTO plasma
 !           for either handed-ness of the coordinate system
 !
 !           Eq. 2.4 in PKM has wrong sign for a left-handed coordinate system
@@ -131,6 +134,43 @@ C-----------------------------------------------
         rcosuv(i) = r1b(i)*cosuv(i)
         rsinuv(i) = r1b(i)*sinuv(i)
       END DO
+
+      if (open_dbg_context("vac1n_surface", num_eqsolve_retries)) then
+        call add_real_2d("r1b", nv, nu,  r1b, order = (/ 2, 1 /) ) ! nu !
+        call add_real_2d("rub", nv, nu3, rub, order = (/ 2, 1 /) )
+        call add_real_2d("rvb", nv, nu3, rvb, order = (/ 2, 1 /) )
+        call add_real_2d("ruu", nv, nu3, ruu, order = (/ 2, 1 /) )
+        call add_real_2d("ruv", nv, nu3, ruv, order = (/ 2, 1 /) )
+        call add_real_2d("rvv", nv, nu3, rvv, order = (/ 2, 1 /) )
+
+        call add_real_2d("z1b", nv, nu,  z1b, order = (/ 2, 1 /) ) ! nu !
+        call add_real_2d("zub", nv, nu3, zub, order = (/ 2, 1 /) )
+        call add_real_2d("zvb", nv, nu3, zvb, order = (/ 2, 1 /) )
+        call add_real_2d("zuu", nv, nu3, zuu, order = (/ 2, 1 /) )
+        call add_real_2d("zuv", nv, nu3, zuv, order = (/ 2, 1 /) )
+        call add_real_2d("zvv", nv, nu3, zvv, order = (/ 2, 1 /) )
+
+        call add_real_2d("guu_b", nv, nu3, guu_b, order = (/ 2, 1 /) )
+        call add_real_2d("guv_b", nv, nu3, guv_b, order = (/ 2, 1 /) )
+        call add_real_2d("gvv_b", nv, nu3, gvv_b, order = (/ 2, 1 /) )
+
+        call add_real_2d("rzb2", nv, nu, rzb2, order = (/ 2, 1 /) ) ! nu !
+
+        call add_real_2d("snr", nv, nu3, snr, order = (/ 2, 1 /) )
+        call add_real_2d("snv", nv, nu3, snv, order = (/ 2, 1 /) )
+        call add_real_2d("snz", nv, nu3, snz, order = (/ 2, 1 /) )
+
+        call add_real_2d("drv", nv, nu3, drv, order = (/ 2, 1 /) )
+
+        call add_real_2d("auu", nv, nu3, auu, order = (/ 2, 1 /) )
+        call add_real_2d("auv", nv, nu3, auv, order = (/ 2, 1 /) )
+        call add_real_2d("avv", nv, nu3, avv, order = (/ 2, 1 /) )
+
+        call add_real_2d("rcosuv", nv, nu, rcosuv, order = (/ 2, 1 /) ) ! nu !
+        call add_real_2d("rsinuv", nv, nu, rsinuv, order = (/ 2, 1 /) ) ! nu !
+
+        call close_dbg_out()
+      end if
 
       DEALLOCATE (ruu, ruv, rvv, zuu, zuv, zvv, cosmn1, sinmn1, stat=i)
 
