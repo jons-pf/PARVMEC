@@ -354,6 +354,28 @@ C-----------------------------------------------
      &       ier_flag .ne. more_iter_flag) EXIT
          IF (numsteps .GT. 0 .or. ns_index .GT. 0) EXIT
 
+         ! If this point is reached, the current multi-grid step should have properly converged.
+         ! Now dump the current state vector for debugging.
+         if (open_dbg_context("multigrid_result", jacob_off)) then
+
+           call add_int("ns", nsval)
+           call add_int("iter2", iter2)
+           call add_int("ncurr", ncurr)
+           call add_real("phiedge", phiedge)
+           call add_int("ntmax", ntmax)
+
+           call add_real_1d("pres", ns-1, pres(2:ns))
+           call add_real_1d("iotas", ns-1, iotas(2:ns))
+           call add_real_1d("chips", ns-1, chips(2:ns))
+
+           call add_real_5d("xc", 3, ntmax, ns, ntor1, mpol,                   &
+     &                      pxc, order=(/ 3, 4, 5, 2, 1 /) )
+           call add_real_5d("scalxc", 3, ntmax, ns, ntor1, mpol,               &
+     &                      pscalxc, order=(/ 3, 4, 5, 2, 1 /) )
+
+           call close_dbg_out()
+         end if
+
 !
 ! give up if it refuses to converge, M.Drevlak
 ! it may help to end a vmec run in an optimization environment, if it
