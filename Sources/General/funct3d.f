@@ -361,6 +361,11 @@ C-----------------------------------------------
                dbsq(l) = ABS(pgcon(l,ns)-bsqsav(l,3))
             END DO
 
+            if (open_dbg_context("rbsq", num_eqsolve_retries)) then
+              call add_real_2d("rbsq", nzeta, ntheta3, rbsq)
+              call close_dbg_out()
+            end if
+
             IF (ivac .EQ. 1) THEN
                IF (vlactive) THEN
                   bsqsav(:nznt,1) = pbzmn_o(:,ns)
