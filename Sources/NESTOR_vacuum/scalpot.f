@@ -3,7 +3,7 @@
       USE parallel_include_module
       USE timer_sub
       USE dbgout
-      USE vmec_main, only: num_eqsolve_retries
+      USE vmec_main, ONLY: num_eqsolve_retries
       IMPLICIT NONE
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
@@ -31,7 +31,7 @@ C-----------------------------------------------
       dbgout_greenf = open_dbg_context("vac1n_greenf",                         &
      &                                 num_eqsolve_retries)
 
-     ALLOCATE (grpmn(nuv3*mnpd2), stat=ip)
+      ALLOCATE (grpmn(nuv3*mnpd2), stat=ip)
       IF (ip .NE. 0) STOP 'GRPMN: Allocation error in scalpot'
 !
 !     COMPUTE TRANFORM OF ANALYTIC SOURCE AND KERNEL
