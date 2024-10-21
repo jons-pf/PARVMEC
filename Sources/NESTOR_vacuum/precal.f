@@ -237,7 +237,6 @@ C-----------------------------------------------
         call close_dbg_out()
       end if
 
-
       numjs_vac=nuv3max-nuv3min+1
 !      blksize_scp=mnpd2
 

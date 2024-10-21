@@ -2,6 +2,9 @@
       USE vacmod
       USE parallel_include_module
       USE timer_sub
+      USE dbgout
+      USE vmec_main, ONLY: num_eqsolve_retries
+
       IMPLICIT NONE
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
@@ -74,9 +77,9 @@ C-----------------------------------------------
 !     RA1P(M):Coefficient of Tl+(-) in eq (A17)
 !
       DO k = nuv3min, nuv3max
-         adp(k) = guu_b(k) + guv_b(k) + gvv_b(k) 
-         adm(k) = guu_b(k) - guv_b(k) + gvv_b(k) 
-         cma(k) = gvv_b(k) - guu_b(k) 
+         adp(k) = guu_b(k) + guv_b(k) + gvv_b(k)
+         adm(k) = guu_b(k) - guv_b(k) + gvv_b(k)
+         cma(k) = gvv_b(k) - guu_b(k)
          sqrtc(k)   = two*SQRT(gvv_b(k))
          sqrta(k)   = two*SQRT(guu_b(k))
       END DO
@@ -119,11 +122,11 @@ C-----------------------------------------------
       sqad2u(k) = SQRT(adm(k))
       tlp1(k) = 0
       tlm1(k) = 0
-      tlp(k)  = one/sqad1u(k)*log((sqad1u(k)*sqrtc(k) 
-     1        + adp(k) + cma(k))/(sqad1u(k)*sqrta(k) 
+      tlp(k)  = one/sqad1u(k)*log((sqad1u(k)*sqrtc(k)
+     1        + adp(k) + cma(k))/(sqad1u(k)*sqrta(k)
      2        - adp(k) + cma(k)))
-      tlm(k)  = one/sqad2u(k)*log((sqad2u(k)*sqrtc(k) 
-     1        + adm(k) + cma(k))/(sqad2u(k)*sqrta(k) 
+      tlm(k)  = one/sqad2u(k)*log((sqad2u(k)*sqrtc(k)
+     1        + adm(k) + cma(k))/(sqad2u(k)*sqrta(k)
      2        - adm(k) + cma(k)))
       tlpm(k) = tlp(k) + tlm(k)
       END DO
@@ -144,10 +147,10 @@ C-----------------------------------------------
          IF (ivacskip .eq. 0) THEN
             DO k = nuv3min,nuv3max
             slp(k) = (r1p(k)*fl + ra1p(k))*tlp(k) + r0p(k)*fl*tlp1(k)
-     1             - (r1p(k) + r0p(k))/sqrtc(k) 
+     1             - (r1p(k) + r0p(k))/sqrtc(k)
      2             + sign1*(r0p(k) - r1p(k))/sqrta(k)
             slm(k) = (r1m(k)*fl + ra1m(k))*tlm(k) + r0m(k)*fl*tlm1(k)
-     1             - (r1m(k) + r0m(k))/sqrtc(k) 
+     1             - (r1m(k) + r0m(k))/sqrtc(k)
      2             + sign1*(r0m(k) - r1m(k))/sqrta(k)
             slpm(k) = slp(k) + slm(k)
             END DO
@@ -166,7 +169,7 @@ C-----------------------------------------------
                END IF
 
                IF (cmns(l,m,n) .eq. zero) CYCLE
-               
+
                IF (n.eq.0 .or. m.eq.0) THEN
 !
 !       1. n = 0 and  m >= 0  OR n > 0 and m = 0
@@ -204,6 +207,21 @@ C-----------------------------------------------
          END DO
 
       END DO LLOOP
+
+      if (open_dbg_context("vac1n_analyt", num_eqsolve_retries)) then
+
+        ! (mf+1)x(2*nf+1)x(ndim: 1 or 2)
+        call add_real_2d("bvec", mf1, nf1, bvec)
+
+        if (ivacskip .eq. 0) then
+          ! missing dim: (ndim: 1 or 2)
+          call add_real_4d("grpmn", mf1, nf1, nv, nu3, grpmn)
+        else
+          call add_null("grpmn")
+        end if
+
+        call close_dbg_out()
+      end if
 
       DEALLOCATE (r0p, r1p, r0m, r1m, sqrtc, sqrta, tlp2, tlp1,
      1          tlp, tlm2, tlm1, tlm, adp, adm, cma, ra1p, ra1m, slm,
