@@ -38,10 +38,6 @@
       CALL Gather1XArray(bvco)
       CALL Gather1XArray(buco)
 
-      print *, iter2,                                                          &
-     &         " ; buco(ns - 1) = ", buco(ns - 1),                             &
-     &         " ; buco(ns    ) = ", buco(ns)
-
 !     FROM AMPERE'S LAW, JcurX are angle averages of jac*JsupX, so
 !                        JcurX = (dV/ds)/twopi**2 <JsupX> where <...> is flux surface average
       !nsmin=MAX(2,t1lglob); nsmax=MIN(t1rglob,ns-1)
