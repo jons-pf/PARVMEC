@@ -1,8 +1,10 @@
-      SUBROUTINE fouri (grpmn, gsource, amatrix, amatsq, bvec, 
+      SUBROUTINE fouri (grpmn, gsource, amatrix, amatsq, bvec,
      &                  bvecNS, ndim)
       USE vacmod
       USE parallel_include_module
       USE timer_sub
+      USE dbgout
+      USE vmec_main, ONLY: num_eqsolve_retries
       IMPLICIT NONE
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
@@ -33,12 +35,12 @@ C-----------------------------------------------
 !     PKM EQ.(2.14), AND mu  - nv (UNPRIMED MESH) IN EQ. (2.16)
 !
 !     ON ENTRY, GRPMN(MN,...) HAS BEEN FOURIER-TRANSFORMED OVER THE UNPRIMED
-!     COORDINATES (IN FOURP), SO THE FIRST INDEX OF GRPMN CORRESPONDS TO THE FIRST 
+!     COORDINATES (IN FOURP), SO THE FIRST INDEX OF GRPMN CORRESPONDS TO THE FIRST
 !     INDEX OF AMATRIX. THUS, THE FOURIER TRANSFORMS OF GRPMN HERE ARE OVER THE PRIMED MESH.
 !
 !     IN CONTRAST, THE INTEGRAL OF THE SOURCE TERM OVER THE PRIMED MESH WAS ALREADY
-!     DONE (IN SCALPOT), SO HERE THE FT ARE OVER THE UNPRIMED MESH FOR THE SOURCE. 
-!  
+!     DONE (IN SCALPOT), SO HERE THE FT ARE OVER THE UNPRIMED MESH FOR THE SOURCE.
+!
       CALL second0(tfourion)
 
       ALLOCATE (source(nuv3), stat=i)
@@ -49,7 +51,7 @@ C-----------------------------------------------
 !
 !     GSOURCE = - (2pi)**2 B * dS (h - hsing) * WINT
 !
-!     WINT: needed to normalize integral over angles to unity 
+!     WINT: needed to normalize integral over angles to unity
 !
       IF (lasym) THEN
          source(nuv3min:nuv3max) = onp*gsource(nuv3min:nuv3max)
@@ -70,7 +72,7 @@ C-----------------------------------------------
 !
       bvecNS = 0
       amatrix = 0
-    
+
 !
 !     PERFORM M,N TRANSFORMS
 !
@@ -83,7 +85,7 @@ C-----------------------------------------------
             DO i = nuv3min, nuv3max
                j = j + 1
                bvecNS(mn,1) = bvecNS(mn,1) + sinmni(j,mn)*source(i)
- 
+
                amatrix(:,mn,1) = amatrix(:,mn,1)
      &                         + sinmni(j,mn)*grpmn(:mnpd,i)
 
@@ -109,11 +111,9 @@ C-----------------------------------------------
          allreduce_time = allreduce_time + (toff - ton)
       END IF
 !
-!     ADD (still not reduced) ANALYTIC AND NON-SINGULAR PARTS 
+!     ADD (still not reduced) ANALYTIC AND NON-SINGULAR PARTS
 !
       bvec = bvec + bvecNS
-
-      DEALLOCATE (source, stat=i)
 
       mn0 = 1 + mf1*nf                                            !Index of m,n=(0,0)
 
@@ -145,6 +145,21 @@ C-----------------------------------------------
          amatsq(1+mnpd:mnpd2,:mnpd) = amatrix(:,:,3)               !Cos-Sin'
          amatsq(1+mnpd:mnpd2,1+mnpd:mnpd2) = amatrix(:,:,4)        !Cos-Cos'
       END IF
+
+      if (open_dbg_context("vac1n_fouri", num_eqsolve_retries)) then
+
+        ! TODO: isym for lasym=.TRUE.
+        call add_real_2d("source", nv, nu2, source)
+
+        call add_real_2d("bvec", mf1, nf1, bvec)
+        call add_real_4d("amatrix", mf1, nf1, mf1, nf1, amatrix)
+
+        call add_real_2d("amatsq", mf1*nf1, mf1*nf1, amatsq)
+
+        call close_dbg_out()
+      end if
+
+      DEALLOCATE (source, stat=i)
 
       CALL second0(tfourioff)
       timer_vac(tfouri) = timer_vac(tfouri) + (tfourioff-tfourion)
