@@ -181,7 +181,8 @@ C-----------------------------------------------
 !
 !       2. n>=1  and  m>=1
 !
-                 CALL analysum2 (grpmn, bvec, slm, tlm, slp, tlp,
+                 !CALL analysum2 (grpmn, bvec, slm, tlm, slp, tlp,
+                 CALL analysum2 (grpmn, bvec, slp, tlp, slm, tlm,
      1                           m, n, l, ivacskip, ndim)
 
                ENDIF
