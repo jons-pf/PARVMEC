@@ -1,8 +1,10 @@
       SUBROUTINE precal (wint)
       USE vparams, ONLY: zero, one, epstan
       USE vacmod
-      USE vmec_main, ONLY: mnmax
+      USE vmec_main, ONLY: mnmax, num_eqsolve_retries
       USE parallel_include_module
+      USE dbgout
+
       IMPLICIT NONE
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
@@ -41,17 +43,17 @@ C-----------------------------------------------
 !     ALLOCATE PERSISTENT ARRAYS. DEALLOCATED IN FILEOUT ROUTINE
 !
       IF (nv == 1) THEN         !(AXISYMMETRIC CASE: DO FP SUM TO INTEGRATE IN V)
-         nvper = 64 
+         nvper = 64
          nuv_tan = 2*nu*nvper
       ELSE
          nvper = nfper
          nuv_tan = 2*nuv
       END IF
-      
+
       alp_per = pi2/nvper
       nvp = nv*nvper
 
-      ALLOCATE (tanu(nuv_tan), tanv(nuv_tan), 
+      ALLOCATE (tanu(nuv_tan), tanv(nuv_tan),
      1     sinper(nvper), cosper(nvper), sinuv(nuv), cosuv(nuv),
      2     sinu(0:mf,nu), cosu(0:mf,nu), sinv(-nf:nf,nv),
      3     cosv(-nf:nf,nv), sinui(0:mf,nu2), cosui(0:mf,nu2),
@@ -124,7 +126,7 @@ C-----------------------------------------------
             END DO
          END DO l40
          DO ku = 1, nu2
-            cosui(m,ku) = cosu(m,ku)*alu*alv*2   
+            cosui(m,ku) = cosu(m,ku)*alu*alv*2
             sinui(m,ku) = sinu(m,ku)*alu*alv*2
             IF (ku.eq.1 .or. ku.eq.nu2) cosui(m,ku) = p5*cosui(m,ku)
          END DO
@@ -218,8 +220,26 @@ C-----------------------------------------------
       cmns(0:mf+nf,0,0)    = (p5*alp)*(cmn(0:mf+nf,0,0)
      1                     +           cmn(0:mf+nf,0,0))
 
+
+      if (open_dbg_context("vac1n_precal", num_eqsolve_retries)) then
+
+        call add_int("nvper", nvper)
+        call add_int("nuv_tan", nuv_tan)
+
+        call add_real_1d("cosper", nvper, cosper)
+        call add_real_1d("sinper", nvper, sinper)
+
+        call add_real_2d("tanu", 2*nu, nuv_tan/(2*nu), tanu)
+        call add_real_2d("tanv", 2*nu, nuv_tan/(2*nu), tanv)
+
+        call add_real_3d("cmns", mf+nf+1, mf+1, nf+1, cmns)
+
+        call close_dbg_out()
+      end if
+
+
       numjs_vac=nuv3max-nuv3min+1
-!      blksize_scp=mnpd2  
+!      blksize_scp=mnpd2
 
       ALLOCATE (counts_vac(vnranks),disps_vac(vnranks), stat=i)
       IF (i .NE. 0) STOP 'Allocation error in precal'
@@ -232,6 +252,6 @@ C-----------------------------------------------
       END DO
 
       CALL second0(tprecoff)
-      precal_time = precal_time + (tprecoff - tprecon) 
+      precal_time = precal_time + (tprecoff - tprecon)
 
       END SUBROUTINE precal
