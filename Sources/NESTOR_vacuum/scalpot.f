@@ -2,6 +2,8 @@
       USE vacmod
       USE parallel_include_module
       USE timer_sub
+      USE dbgout
+      USE vmec_main, only: num_eqsolve_retries
       IMPLICIT NONE
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
@@ -16,7 +18,8 @@ C-----------------------------------------------
       REAL(dp), ALLOCATABLE :: greenp(:,:)
       REAL(dp) :: ton, toff, tonscal
 
-      integer :: info
+      INTEGER :: info
+      LOGICAL :: dbgout_greenf
 
 C-----------------------------------------------
       CALL second0(tonscal)
@@ -25,9 +28,11 @@ C-----------------------------------------------
          STOP 'AMATSAV: Allocation error in scalpot'
       END IF
 
-      ALLOCATE (grpmn(nuv3*mnpd2), stat=ip)
-      IF (ip .NE. 0) STOP 'GRPMN: Allocation error in scalpot'
+      dbgout_greenf = open_dbg_context("vac1n_greenf",                         &
+     &                                 num_eqsolve_retries)
 
+     ALLOCATE (grpmn(nuv3*mnpd2), stat=ip)
+      IF (ip .NE. 0) STOP 'GRPMN: Allocation error in scalpot'
 !
 !     COMPUTE TRANFORM OF ANALYTIC SOURCE AND KERNEL
 !     ON EXIT, BVEC CONTAINS THE TRANSFORM OF THE ANALYTIC SOURCE
@@ -43,8 +48,12 @@ C-----------------------------------------------
       IF (ivacskip .NE. 0) THEN
          bvec = bvec + bvecsav
       ELSE
-
-         istore_max = MIN(64,nuv3)
+         IF (dbgout_greenf) THEN
+            ! dump the whole thing at once for debugging
+            istore_max = nuv3
+         ELSE
+            istore_max = MIN(64,nuv3)
+         END IF
 
          ALLOCATE (green(nuv), gstore(nuv), greenp(nuv,istore_max),
      &             stat=ip)
@@ -104,6 +113,16 @@ C-----------------------------------------------
          CALL second0(toff)
          allreduce_time = allreduce_time + (toff - ton)
          timer_vac(tallr) = timer_vac(tallr) + (toff-ton)
+
+         if (dbgout_greenf) then
+            call add_real_4d("green",  nv, nu, nv, nu3, green)
+            call add_real_4d("greenp", nv, nu, nv, nu3, greenp)
+
+            call add_real_2d("gstore", nv, nu, gstore)
+
+            call close_dbg_out()
+         end if
+
 !
 !        COMPUTE FOURIER INTEGRAL OF GRADIENT (GRPMN) OVER PRIMED MESH IN EQ. 2.14
 !        AND SOURCE (GSTORE) OVER UNPRIMED MESH IN EQ. 2.16
