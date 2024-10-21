@@ -28,9 +28,6 @@ C-----------------------------------------------
          STOP 'AMATSAV: Allocation error in scalpot'
       END IF
 
-      dbgout_greenf = open_dbg_context("vac1n_greenf",                         &
-     &                                 num_eqsolve_retries)
-
       ALLOCATE (grpmn(nuv3*mnpd2), stat=ip)
       IF (ip .NE. 0) STOP 'GRPMN: Allocation error in scalpot'
 !
@@ -41,9 +38,11 @@ C-----------------------------------------------
 !
 !     FOR ivacskip != 0, USE PREVIOUSLY COMPUTED bvecsav FOR SPEED
 !
-
       ndim = mnpd2/mnpd
       CALL analyt (grpmn, bvec, ivacskip, ndim)
+
+      dbgout_greenf = open_dbg_context("vac1n_greenf",                         &
+     &                                 num_eqsolve_retries)
 
       IF (ivacskip .NE. 0) THEN
          bvec = bvec + bvecsav
@@ -98,8 +97,19 @@ C-----------------------------------------------
 !        AND STORE IN GRPMN (NOTE THAT GRPMN IS ADDED TO THE ANALYTIC PIECE IN EQ. 2.14,
 !        - COMPUTED IN ANALYT - WHICH HAS THE APPROPRIATE SIN, COS FACTORS ALREADY)
 !
-
             IF (istore.EQ.istore_max .OR. ip.EQ.nuv3max) THEN
+               if (dbgout_greenf) then
+                  ! if in debugging, this will only be called once
+
+                  ! in educational_VMEC, we save every intermediate value of `green` - not here
+                  ! call add_real_4d("green",  nv, nu, nv, nu3, green)
+
+                  call add_real_4d("greenp", nv, nu, nv, nu3, greenp)
+                  call add_real_2d("gstore", nv, nu, gstore)
+
+                  call close_dbg_out()
+               end if
+
                CALL fourp (grpmn, greenp, istore, istart, ip, ndim)
             END IF
 
@@ -113,18 +123,6 @@ C-----------------------------------------------
          CALL second0(toff)
          allreduce_time = allreduce_time + (toff - ton)
          timer_vac(tallr) = timer_vac(tallr) + (toff-ton)
-
-         if (dbgout_greenf) then
-
-            ! in educational_VMEC, we save every intermediate value of `green` - not here
-            ! call add_real_4d("green",  nv, nu, nv, nu3, green)
-
-            call add_real_4d("greenp", nv, nu, nv, nu3, greenp)
-
-            call add_real_2d("gstore", nv, nu, gstore)
-
-            call close_dbg_out()
-         end if
 
 !
 !        COMPUTE FOURIER INTEGRAL OF GRADIENT (GRPMN) OVER PRIMED MESH IN EQ. 2.14
