@@ -115,7 +115,10 @@ C-----------------------------------------------
          timer_vac(tallr) = timer_vac(tallr) + (toff-ton)
 
          if (dbgout_greenf) then
-            call add_real_4d("green",  nv, nu, nv, nu3, green)
+
+            ! in educational_VMEC, we save every intermediate value of `green` - not here
+            ! call add_real_4d("green",  nv, nu, nv, nu3, green)
+
             call add_real_4d("greenp", nv, nu, nv, nu3, greenp)
 
             call add_real_2d("gstore", nv, nu, gstore)
