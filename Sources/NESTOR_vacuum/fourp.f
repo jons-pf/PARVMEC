@@ -2,6 +2,9 @@
       USE vacmod
       USE parallel_include_module
       USE timer_sub
+      USE dbgout
+      USE vmec_main, ONLY: num_eqsolve_retries
+
       IMPLICIT NONE
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
@@ -24,7 +27,7 @@ C-----------------------------------------------
 !     NOTE: THE .5 FACTOR (IN COSN,SINN) ACCOUNTS FOR THE SUM IN KERNELM
 !     ON ENTRY THE FIRST TIME, GRPMN IS SIN,COS * Kmn(analytic)
 !
-!     THE 3rd INDEX OF GRPMN IS THE PRIMED U,V MESH COORDINATE     
+!     THE 3rd INDEX OF GRPMN IS THE PRIMED U,V MESH COORDINATE
 !
       CALL second0(tfourpon)
       ALLOCATE (g1(istore,nu2,0:nf,ndim), g2(istore,nu2,0:nf,ndim),
@@ -47,7 +50,7 @@ C-----------------------------------------------
                         kernel(ip) =
      1                  grp(iuv,ip) - grp(ireflect,ip)           !anti-symmetric part (u,v -> -u,-v)
                      ELSE IF (isym .EQ. 2) THEN
-                        kernel(ip) = 
+                        kernel(ip) =
      1                  grp(iuv,ip) + grp(ireflect,ip)           !symmetric part
                      END IF
                      g1(ip,ku,n,isym)=g1(ip,ku,n,isym) + cosn*kernel(ip)
@@ -62,7 +65,7 @@ C-----------------------------------------------
 !
 !     PERFORM KU (POLOIDAL ANGLE) TRANFORM [COMPLETE SIN(mu-nv) / COS(mu-nv) TRANSFORM]
 !
-      
+
       DO m = 0,mf
          DO ku = 1,nu2
             DO isym = 1, ndim
@@ -77,13 +80,13 @@ C-----------------------------------------------
                      DO ip = 1,istore
                         gcos(ip) = g1(ip,ku,n,isym)*sinm
                         gsin(ip) = g2(ip,ku,n,isym)*cosm
-                        grpmn(m,n,isym,ip+istart) = 
+                        grpmn(m,n,isym,ip+istart) =
      1                  grpmn(m,n,isym,ip+istart) + gcos(ip) + gsin(ip)
                      END DO
 
                      IF (n.NE.0 .AND. m.NE.0) THEN           !zero for m=0,n<0 (SPH082515)
                         DO ip = 1,istore
-                           grpmn(m,-n,isym,ip+istart) = 
+                           grpmn(m,-n,isym,ip+istart) =
      1                     grpmn(m,-n,isym,ip+istart)
      2                         + gcos(ip) - gsin(ip)
                         END DO
@@ -96,6 +99,14 @@ C-----------------------------------------------
       istart = iend
 
       DEALLOCATE (g1, g2, kernel, gcos, gsin, stat=m)
+
+      if (open_dbg_context("vac1n_fourp", num_eqsolve_retries)) then
+
+        ! NOTE: This is the sum of the results from analyt and fourp!
+        call add_real_4d("grpmn", mf1, nf1, nv, nu3, grpmn)
+
+        call close_dbg_out()
+      end if
 
       CALL second0(tfourpoff)
       timer_vac(tfourp) = timer_vac(tfourp) + (tfourpoff-tfourpon)
