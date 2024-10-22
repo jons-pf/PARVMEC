@@ -310,6 +310,10 @@ C-----------------------------------------------
       IF (irst .NE. 1) THEN
          CALL restart_iter(delt0r)
          iter1 = iter2
+
+         ! need to increment this here in order to not overwrite files
+         num_eqsolve_retries = num_eqsolve_retries + 1
+
          IF (PARVMEC) THEN
             CALL funct3d_par(.FALSE., ier_flag)
          ELSE

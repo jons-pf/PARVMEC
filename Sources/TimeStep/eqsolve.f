@@ -62,6 +62,7 @@ C-----------------------------------------------
    20 CONTINUE
 
 !     !!! THIS must be the ONLY place where this gets incremented !!!
+!     In PARVMEC (here), we ALSO increment it in TimeStepControl in evolve.
       num_eqsolve_retries = num_eqsolve_retries + 1
 
 !
