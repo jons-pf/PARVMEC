@@ -263,7 +263,8 @@ C-----------------------------------------------
 
       SUBROUTINE TimeStepControl(ier_flag, PARVMEC)
       USE vmec_main, ONLY: res0, res1, fsq, fsqr, fsqz, fsql,
-     &                     irst, iter1, iter2, delt0r, dp
+     &                     irst, iter1, iter2, delt0r, dp,
+     &                     num_eqsolve_retries
       USE vmec_params, ONLY: ns4
       USE vparams, ONLY: c1pm2
       USE vmec_input, ONLY: nstep
