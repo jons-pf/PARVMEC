@@ -16,6 +16,8 @@
 !-----------------------------------------------
       CALL second0(treston)
 
+      print *, "restart_iter irst=", irst
+
       IF (PARVMEC) THEN
          SELECT CASE (irst)
             CASE DEFAULT

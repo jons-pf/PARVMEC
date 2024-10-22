@@ -40,6 +40,9 @@ C-----------------------------------------------
       INTEGER, DIMENSION(4) :: bbuf
 C-----------------------------------------------
       CALL second0 (tfunon)
+
+      print *, "funct3d"
+
 !
 !     POINTER ALIASES
 !
