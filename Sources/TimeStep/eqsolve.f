@@ -156,6 +156,7 @@ C-----------------------------------------------
             ier_flag = jac75_flag
             liter_flag = .false.
          ELSE IF (iter2.ge.niter .and. liter_flag) THEN
+            print *, "ran out of iterations -> leave iter_loop"
             ier_flag = more_iter_flag
             liter_flag = .false.
          END IF
