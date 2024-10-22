@@ -370,9 +370,9 @@ C-----------------------------------------------
            call add_real_1d("chips", ns-1, chips(2:ns))
 
            call add_real_5d("xc", 3, ntmax, ns, ntor1, mpol,                   &
-     &                      pxc, order=(/ 3, 4, 5, 2, 1 /) )
+     &                      pxc, order=(/ 4, 5, 3, 2, 1 /) )
            call add_real_5d("scalxc", 3, ntmax, ns, ntor1, mpol,               &
-     &                      pscalxc, order=(/ 3, 4, 5, 2, 1 /) )
+     &                      pscalxc, order=(/ 4, 5, 3, 2, 1 /) )
 
            call close_dbg_out()
          end if
