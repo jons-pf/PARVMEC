@@ -164,6 +164,8 @@ C-----------------------------------------------
          ELSE IF (iter2        .EQ. iter1 .AND.
      &            ivac         .LE. 0     .AND.
      &            ictrl_prec2d .EQ. 0) THEN
+            print *, "extrapolate (r,z)con into volume"
+
 #if defined(MPI_OPT)
             ALLOCATE(bcastbuf(2*nznt))
             bcastbuf(1:nznt)=prcon(:,ns,0)
@@ -187,6 +189,10 @@ C-----------------------------------------------
 !     COMPUTE S AND THETA DERIVATIVE OF R AND Z AND JACOBIAN ON HALF-GRID
 !
          CALL jacobian_par
+
+         IF (irst.EQ.2 .AND. iequi.EQ.0) THEN
+           print *, "bad Jacobian -- early return from funct3d"
+         end if
 
 !     COMPUTE COVARIANT COMPONENTS OF B, MAGNETIC AND KINETIC
 !     PRESSURE, AND METRIC ELEMENTS ON HALF-GRID
@@ -227,14 +233,18 @@ C-----------------------------------------------
      &    iter2 .GT. 1 .AND.
      &    iequi .EQ. 0) THEN
 
-         IF (ictrl_prec2d.LE.1 .AND. (fsqr + fsqz).LE.1.e-3_dp)
-     &      ivac = ivac+1   !decreased from e-1 to e-3 - sph12/04
+         IF (ictrl_prec2d.LE.1 .AND. (fsqr + fsqz).LE.1.e-3_dp) THEN
+            print *, "activate Nestor"
+            ivac = ivac+1   !decreased from e-1 to e-3 - sph12/04
+         END IF
 
          IF (nvskip0 .EQ. 0) nvskip0 = MAX(1, nvacskip)
 
          IVAC0: IF (ivac .GE. 0) THEN
+            print *, "compute Nestor contribution"
 !SPH OFF: 6.20.17
 !           IF INITIALLY ON, TURN OFF rcon0, zcon0 SLOWLY
+            print *, "reduce (r,z)con"
             IF (lactive) THEN
                IF (ictrl_prec2d .EQ. 2) THEN
                   prcon0(:,nsmin:nsmax) = 0;  pzcon0(:,nsmin:nsmax) = 0
@@ -245,7 +255,10 @@ C-----------------------------------------------
             ENDIF
             CALL second0 (tvacon)
             ivacskip = MOD(iter2-iter1,nvacskip)
-            IF (ivac .LE. 2) ivacskip = 0
+            IF (ivac .LE. 2) THEN
+               print *, "force full Nestor computation"
+               ivacskip = 0
+            END IF
 
 !           EXTEND NVACSKIP AS EQUILIBRIUM CONVERGES
             IF (ivacskip .EQ. 0) THEN
@@ -348,7 +361,9 @@ C-----------------------------------------------
 !          RESET FIRST TIME FOR SOFT START
 !
             IF (ivac .EQ. 1) THEN
-               irst = 2;  delt0 = delt
+               print *, "first Nestor call - force restart via BAD_JACOBIAN logic"
+               irst = 2
+               delt0 = delt
                CALL restart_iter(delt0)
                irst = 1
             END IF
@@ -365,6 +380,7 @@ C-----------------------------------------------
                presf_ns = (pmass(1._dp)/presf_ns) * pres(ns)
             END IF
 
+            print *, "update rbsq"
             DO l = 1, nznt
                bsqsav(l,3) = 1.5_dp*pbzmn_o(l,ns)
      &                     - 0.5_dp*pbzmn_o(l,ns-1)

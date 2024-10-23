@@ -146,6 +146,7 @@ C-----------------------------------------------
 !     COMPUTE ABSOLUTE STOPPING CRITERION
       IF (iter2.EQ.1 .and. irst.EQ.2) THEN
          ier_flag = bad_jacobian_flag
+         print *, "absolute stop in Evolve"
          RETURN
 !  JDH 2012-04-24. Revise this absolute stopping criterion, so that if v3fit
 !    is running, then have to iterate at least 2 * nvacskip steps
@@ -157,6 +158,7 @@ C-----------------------------------------------
      &         fsql .le. ftolv) THEN
          liter_flag = .false.
          ier_flag = successful_term_flag
+         print *, "absolute stop in Evolve"
          RETURN
       ENDIF
 
@@ -314,6 +316,8 @@ C-----------------------------------------------
 
          ! need to increment this here in order to not overwrite files
          num_eqsolve_retries = num_eqsolve_retries + 1
+
+         print *, "try second funct3d call"
 
          IF (PARVMEC) THEN
             CALL funct3d_par(.FALSE., ier_flag)
