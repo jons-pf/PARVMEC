@@ -361,7 +361,8 @@ C-----------------------------------------------
 !          RESET FIRST TIME FOR SOFT START
 !
             IF (ivac .EQ. 1) THEN
-               print *, "first Nestor call - force restart via BAD_JACOBIAN logic"
+               print *, "first Nestor call - force restart"/
+     &                  "via BAD_JACOBIAN logic"
                irst = 2
                delt0 = delt
                CALL restart_iter(delt0)
