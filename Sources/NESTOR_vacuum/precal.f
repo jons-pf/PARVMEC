@@ -208,9 +208,10 @@ C-----------------------------------------------
 !
       DO m = 1,mf
          DO n = 1,nf
-            cmns(0:mf+nf,m,n) = p5*alp*(cmn(0:mf+nf,m,n) +
-     1      cmn(0:mf+nf,m-1,n) + cmn(0:mf+nf,m,n-1) +
-     2      cmn(0:mf+nf,m-1,n-1))
+            cmns(0:mf+nf,m,n) = p5*alp*(cmn(0:mf+nf,m  ,n  ) +
+     1                                  cmn(0:mf+nf,m-1,n  ) +
+     2                                  cmn(0:mf+nf,m  ,n-1) +
+     3                                  cmn(0:mf+nf,m-1,n-1))
          END DO
       END DO
       cmns(0:mf+nf,1:mf,0) = (p5*alp)*(cmn(0:mf+nf,1:mf,0)

@@ -4,7 +4,7 @@
       USE vmec_input, ONLY: lasym
       USE vmec_params, ONLY: signgs
       USE vparams, ONLY: zero, one, c2p0, cp5
-      USE mgrid_mod, ONLY: nr0b, np0b, nz0b, 
+      USE mgrid_mod, ONLY: nr0b, np0b, nz0b,
      1   rminb, zminb, rmaxb, zmaxb, delrb, delzb
       IMPLICIT NONE
 C-----------------------------------------------
@@ -22,8 +22,14 @@ C-----------------------------------------------
      3   guu_b, guv_b, gvv_b, rzb2, rcosuv, rsinuv,
      5   bredge, bpedge, bzedge
       INTEGER, ALLOCATABLE :: ipiv(:)
-      REAL(rprec), DIMENSION(:), ALLOCATABLE :: raxis_nestor, 
+      REAL(rprec), DIMENSION(:), ALLOCATABLE :: raxis_nestor,
      1                                          zaxis_nestor
       REAL(rprec) :: bsubvvac, pi2,
      2   pi3, pi4, alp, alu, alv, alvp, onp, onp2
+
+      real(rprec), dimension(:,:), allocatable :: all_tlp
+      real(rprec), dimension(:,:), allocatable :: all_tlm
+      real(rprec), dimension(:,:), allocatable :: all_slp
+      real(rprec), dimension(:,:), allocatable :: all_slm
+
       END MODULE vacmod

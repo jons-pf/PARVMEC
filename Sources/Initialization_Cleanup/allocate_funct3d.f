@@ -50,13 +50,13 @@ C-----------------------------------------------
       ALLOCATE (pextra1(nznt,ns,0:1), stat=istat1)
       IF (istat1.ne.0) STOP 'allocation error #3 in allocate_funct3d'
       pextra1=0
-      
+
       IF (lasym) THEN
-         ALLOCATE (pextra2(nznt,ns,0:1), 
+         ALLOCATE (pextra2(nznt,ns,0:1),
      &             pextra3(nznt,ns,0:1),
      &             pextra4(nznt,ns,0:1),stat=istat1)
       ELSE
-         ALLOCATE (pextra2(nznt,ns,1), 
+         ALLOCATE (pextra2(nznt,ns,1),
      &             pextra3(nznt,ns,1),
      &             pextra4(nznt,ns,1),stat=istat1)
       END IF
@@ -70,7 +70,7 @@ C-----------------------------------------------
       parmn_e => parmn(:,:,0)
       parmn_o => parmn(:,:,1)
       parmn = zero
-      
+
       pazmn_e => pazmn(:,:,0)
       pazmn_o => pazmn(:,:,1)
       pazmn = zero
@@ -78,7 +78,7 @@ C-----------------------------------------------
       pbrmn_e => pbrmn(:,:,0)
       pbrmn_o => pbrmn(:,:,1)
       pbrmn = zero
-      
+
       pbzmn_e => pbzmn(:,:,0)
       pbzmn_o => pbzmn(:,:,1)
       pbzmn = zero
@@ -137,6 +137,11 @@ C-----------------------------------------------
             STOP 'allocation error #2 in allocate_funct3d'
          END IF
          brv=0; bphiv=0; bzv=0; bsqvac=0
+
+         allocate(all_tlp(0:mf+nf, nuv3), all_tlm(0:mf+nf, nuv3),              &
+     &            all_slp(0:mf+nf, nuv3), all_slm(0:mf+nf, nuv3),              &
+     &            stat=istat1)
+         IF (istat1 .ne. 0) STOP 'Allocation error for debugging analyt'
       END IF
 
       ALLOCATE (extra1(ndim,0:1), stat=istat1)
@@ -144,9 +149,9 @@ C-----------------------------------------------
          STOP 'allocation error #3 in allocate_funct3d'
       END IF
       extra1=0
-     
+
       IF (lasym) THEN
-         ALLOCATE (extra2(ndim,0:1), extra3(ndim,0:1), 
+         ALLOCATE (extra2(ndim,0:1), extra3(ndim,0:1),
      1             extra4(ndim,0:1),stat=istat1)
       ELSE
          ALLOCATE (extra2(ndim,1), extra3(ndim,1), extra4(ndim,1),
@@ -246,9 +251,9 @@ C-----------------------------------------------
          STOP 'allocation error #3 in allocate_funct3d'
       END IF
       extra1=0
-      
+
       IF (lasym) THEN
-         ALLOCATE (extra2(ndim,0:1), extra3(ndim,0:1), 
+         ALLOCATE (extra2(ndim,0:1), extra3(ndim,0:1),
      &             extra4(ndim,0:1),stat=istat1)
       ELSE
          ALLOCATE (extra2(ndim,1), extra3(ndim,1), extra4(ndim,1),
