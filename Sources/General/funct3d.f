@@ -53,7 +53,7 @@ C-----------------------------------------------
 
       ! dump state vector
       write(filename, 998) "dump_parvmec",                                     &
-     &                     "funct3d_xc_",                                      &
+     &                     "funct3d_xc",                                      &
      &                     ns, nfunct3d
 998   format(a,'/',a,'_',i5.5,'_',i5.5,'.dat')
       open(unit=73, file=trim(filename), status="unknown")
