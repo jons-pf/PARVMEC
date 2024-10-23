@@ -54,7 +54,7 @@ C-----------------------------------------------
       ! dump state vector
       write(filename, 998) "dump_parvmec",                                     &
      &                     "funct3d_xc_",                                      &
-     &                     ns, nfunct3d)
+     &                     ns, nfunct3d
 998   format(a,'/',a,'_',i5.5,'_',i5.5,'.dat')
       open(unit=73, file=trim(filename), status="unknown")
       write(73, *) pxc
