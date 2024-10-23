@@ -140,6 +140,11 @@ C-----------------------------------------------
 
       LLOOP: DO l = 0, mf + nf
          fl = fl1
+
+         ! here, tlp/m are available for the current value of l
+         ! --> save into matrix for debugging
+         all_tlp(l,:) = tlp
+         all_tlm(l,:) = tlm
 !
 !     COMPUTE SL+ and SL- , Eq (A17)
 !     SLP(M): SL+(-)
@@ -154,6 +159,11 @@ C-----------------------------------------------
      2             + sign1*(r0m(k) - r1m(k))/sqrta(k)
             slpm(k) = slp(k) + slm(k)
             END DO
+
+            ! here, slp/m are available for the current value of l
+            ! --> save into matrix for debugging
+            all_slp(l,:) = slp
+            all_slm(l,:) = slm
          ENDIF
 !
 !     BEGIN MODE NUMBER (m,n) LOOP
@@ -212,12 +222,18 @@ C-----------------------------------------------
       if (open_dbg_context("vac1n_analyt", num_eqsolve_retries)) then
 
         ! (mf+1)x(2*nf+1)x(ndim: 1 or 2)
+        call add_real_3d("all_tlp", mf+nf+1, nv, nu3, all_tlp)
+        call add_real_3d("all_tlm", mf+nf+1, nv, nu3, all_tlm)
         call add_real_2d("bvec", mf1, nf1, bvec)
 
         if (ivacskip .eq. 0) then
           ! missing dim: (ndim: 1 or 2)
+          call add_real_3d("all_slp", mf+nf+1, nv, nu3, all_slp)
+          call add_real_3d("all_slm", mf+nf+1, nv, nu3, all_slm)
           call add_real_4d("grpmn", mf1, nf1, nv, nu3, grpmn)
         else
+          call add_null("all_slp")
+          call add_null("all_slm")
           call add_null("grpmn")
         end if
 
