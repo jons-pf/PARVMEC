@@ -38,6 +38,7 @@ C-----------------------------------------------
       INTEGER :: i, j, k, nsmin, nsmax, m
       REAL(dp), ALLOCATABLE, DIMENSION(:) :: bcastbuf
       INTEGER, DIMENSION(4) :: bbuf
+      character(len=255) :: filename
 C-----------------------------------------------
       CALL second0 (tfunon)
 
@@ -50,6 +51,14 @@ C-----------------------------------------------
       nfunct3d = nfunct3d + 1
       lu => pczmn;  lv => pcrmn
 
+      ! dump state vector
+      write(filename, 998) "dump_parvmec",                                     &
+     &                     "funct3d_xc_",                                      &
+     &                     ns, nfunct3d)
+998   format(a,'/',a,'_',i5.5,'_',i5.5,'.dat')
+      open(unit=73, file=trim(filename), status="unknown")
+      write(73, *) pxc
+      close(73)
 
 !     CONVERT ODD M TO 1/SQRT(S) INTERNAL REPRESENTATION
       ACTIVE1: IF (lactive) THEN
